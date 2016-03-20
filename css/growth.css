@@ -25,19 +25,11 @@ h1 {
 hr {
   line-height: -10px;
 }
-p {
-  text-align: right;
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 18px;
-  margin-left: 10px;
-  margin-bottom: 10px;
-}
 .label {
   float: left;
 }
 #wrapper {
-  width: 975px;
+  width: 1275px;
   height: auto;
   text-align: left;
   display: inline-block;
@@ -76,23 +68,126 @@ p {
   height: 610px;
   overflow: visible;
   border-radius: 100%;
-  box-shadow: 0 0 0 5px white;
+  box-shadow: 0 0 0 2px white;
+  cursor: pointer;
+  margin-bottom: 20px;
 }
 #controls-wrapper {
   margin: 0;
   display: inline-block;
   vertical-align: top;
   background: #1d2835;
-  width: 340px;
+  width: 440px;
   text-align: center;
   border: 1px solid white;
   margin-left: 20px;
+  padding: 10px;
+}
+#controls-wrapper .parameters-group-header {
+  margin-top: 15px;
+  margin-bottom: 10px;
+}
+#controls-wrapper .parameter {
+  text-align: center;
+  margin: 0;
+  padding: 5px;
+  font-size: 15px;
+}
+#controls-wrapper .parameter .parameter-name {
+  display: inline-block;
+  font-weight: bolder;
+  width: 120px;
+  vertical-align: top;
+}
+#controls-wrapper .parameter .parameter-min,
+#controls-wrapper .parameter .parameter-max {
+  display: inline-block;
+  width: 50px;
+}
+#controls-wrapper .parameter .parameter-min {
+  text-align: right;
+}
+#controls-wrapper .parameter .parameter-max {
+  text-align: left;
+}
+#controls-wrapper .parameter input[type='range'] {
+  display: inline-block;
+  -webkit-appearance: none !important;
+  height: 1px;
+  width: 180px;
+  background: rgba(255, 255, 255, 0.5);
+  margin: 5px;
+  vertical-align: bottom;
+  cursor: pointer;
+}
+#controls-wrapper .parameter input[type='range']:after,
+#controls-wrapper .parameter input[type='range']:before {
+  content: "";
+  position: absolute;
+  width: 1px;
+  height: 17px;
+  background: rgba(255, 255, 255, 0.5);
+  margin-top: -8px;
+}
+#controls-wrapper .parameter input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  background: #3e4956;
+  height: 15px;
+  width: 15px;
+  border: solid;
+  border-width: 1px;
+  border-radius: 10px;
+  border-color: #FFFFFF;
+}
+#controls-wrapper .parameter .minicolors-theme-picker {
+  margin-top: 5px;
+  display: inline-block;
+  width: 180px;
+  text-align: left;
+}
+#controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel {
+  border: none;
+  background-color: transparent;
+}
+#controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel .minicolors-grid .minicolors-grid-inner {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+#controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel .minicolors-slider,
+#controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel .minicolors-opacity-slider {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+#controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel .minicolors-slider .minicolors-picker,
+#controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel .minicolors-opacity-slider .minicolors-picker {
+  background: #3e4956;
+  border: none;
+  box-shadow: 0 0 0 1px white;
+  width: 24px;
+  height: 8px;
+  margin-left: -2px;
+  margin-top: -4px;
+  border-radius: 8px;
+}
+#controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel .minicolors-slider {
+  margin-left: 10px;
+}
+#controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel .minicolors-opacity-slider {
+  margin-left: 20px;
+}
+.button {
+  text-align: center;
+  font-size: 20;
+  cursor: pointer;
+  background: #6f839a;
+  padding: 10px;
+  display: inline-block;
+}
+.button:hover {
+  background: #7eab55;
 }
 /*BUTTONS*/
 #buttonDiv {
   text-align: center;
   width: 100$;
-  margin-top: 5px;
   border: 1px solid white;
   padding: 10px;
 }
@@ -116,35 +211,18 @@ p {
   color: #6f839a;
   cursor: pointer;
   padding: 10px;
-  display: inline;
+  display: inline-block;
   background-color: #3e4956;
+  border-radius: 100%;
+  line-height: 50px;
+  height: 50px;
+  width: 50px;
 }
 #buttonDiv .radioDiv input[type="radio"]:checked + .switch--on {
   color: #fff;
   background-color: #7eab55;
 }
 /*SLIDERS*/
-input[type='range'] {
-  -webkit-appearance: none !important;
-  height: 1px;
-  width: 55%;
-  text-align: right;
-  float: right;
-  margin-right: 20px;
-  margin-top: 10px;
-  margin-left: 20px;
-  vertical-align: bottom;
-}
-input[type='range']::-webkit-slider-thumb {
-  -webkit-appearance: none !important;
-  background: #3e4956;
-  height: 19px;
-  width: 19px;
-  border: solid;
-  border-width: 1px;
-  border-radius: 10px;
-  border-color: #FFFFFF;
-}
 /*RADIO BUTTON*/
 /*----gallery----*/
 #grid {
