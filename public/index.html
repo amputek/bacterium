@@ -37,114 +37,139 @@
                 </div>
             </div>
 
-            <div id="controls-wrapper">
-                <div class = "parameters-group-header">COLONY INITIALISATION</div>
-                <div class = "parameter">
-                    <div class = "parameter-name">seed count</div>
-                    <div class = "parameter-min">1</div>
-                    <input type="range" id="startingBranches" min="0" max="100.0">
-                    <div class = "parameter-max">400</div>
+            <div id="controls-outer-wrapper">
+                <div id = "tabs-wrapper">
+                    <h4>MODE:</h4>
+                    <div class = "tab selected" id = "grow-tab">GROW</div>
+                    <div class = "tab" id = "breed-tab">BREED</div>
                 </div>
-                <div class = "parameter">
-                    <div class = "parameter-name">seed size (px)</div>
-                    <div class = "parameter-min">1px</div>
-                    <input type="range" id="startingSize" min="0" max="100.0">
-                    <div class = "parameter-max">30px</div>
-                </div>
-                <div class = "parameters-group-header">BRANCH SPLITTING</div>
-                <div class = "parameter">
-                    <div class = "parameter-name">split probability</div>
-                    <div class = "parameter-min">0%</div>
-                    <input type="range" id="branchFactor" min="0.0" max="100.0">
-                    <div class = "parameter-max">10%</div>
-                </div>
-                <div class = "parameter">
-                    <div class = "parameter-name">split direction</div>
-                    <div class = "parameter-min">180 c</div>
-                    <input type="range" id="branchDirection" min="0.0" max="100.0">
-                    <div class = "parameter-max">180 cc</div>
-                </div>
-                <div class = "parameters-group-header">BRANCH GROWTH</div>
-                <div class = "parameter">
-                    <div class = "parameter-name">colony spread</div>
-                    <div class = "parameter-min">small</div>
-                    <input type="range" id="gapSize" min="0.0" max="100.0">
-                    <div class = "parameter-max">big</div>
-                </div>
-                <!-- <div class = "parameter">
-                    <div class = "parameter-name">growth sine</div>
-                    <div class = "parameter-min">straight</div>
-                    <input type="range" id="sineMod" min="0.0" max="100.0">
-                    <div class = "parameter-max">full sine</div>
-                </div> -->
-                <div class = "parameter">
-                    <div class = "parameter-name">branch curve</div>
-                    <div class = "parameter-min">straight</div>
-                    <input type="range" id="curveMod" min="0.0" max="100.0">
-                    <div class = "parameter-max">+10°</div>
-                </div>
-                <div class = "parameter">
-                    <div class = "parameter-name">curve quality</div>
-                    <div class = "parameter-min">ordered</div>
-                    <input type="range" id="curveRandom" min="0.0" max="100.0">
-                    <div class = "parameter-max">chaotic</div>
-                </div>
-                <div class = "parameter">
-                    <div class = "parameter-name">branch longevity</div>
-                    <div class = "parameter-min">sooner</div>
-                    <input type="range" id="deathSize" min="0.0" max="100.0">
-                    <div class = "parameter-max">later</div>
-                </div>
-                <div class = "parameters-group-header">APPEARANCE</div>
-                <div class = "parameter">
-                    <div class = "parameter-name">solidness</div>
-                    <div class = "parameter-min">hollow</div>
-                    <input type="range" id="solidness" min="0.1" max="100.0">
-                    <div class = "parameter-max">solid</div>
-                </div>
-                <div class = "parameter">
-                    <div class = "parameter-name">fatness</div>
-                    <div class = "parameter-min">slim</div>
-                    <input type="range" id="fatness" min="0.1" max="100.0">
-                    <div class = "parameter-max">dashed</div>
-                </div>
-                <div class = "parameter">
-                    <div class = "parameter-name">branch length</div>
-                    <div class = "parameter-min">short</div>
-                    <input type="range" id="pointSize" min="0.1" max="100.0">
-                    <div class = "parameter-max">long</div>
-                </div>
-                <div class = "parameter">
-                    <div class = "parameter-name">size quality</div>
-                    <div class = "parameter-min">ordered</div>
-                    <input type="range" id="pointSizeRandom" min="0.1" max="100.0">
-                    <div class = "parameter-max">chaotic</div>
-                </div>
-                <div class = "parameter">
-                    <div class = "parameter-name">color</div>
-                    <div class = "parameter-min"></div>
-                    <input type='text' id="color-picker" />
-                    <div class = "parameter-max"></div>
-                </div>
-                <div id="upload-colony" class="button">UPLOAD COLONY</div>
-                <div id="randomButton" class="button">RANDOMISE</div>
-            </div>
+                <div id="controls-wrapper">
+                    <h3>COLONY PARAMETERS</h3>
 
-            <div id="gallery">
-                <div id="grid"></div>
-            </div>
-                    <!-- </div>
-                    <div id="source" class="sourcedest"></div>
-                    <div id="dest" class="sourcedest"></div>
-                    <div>
-                        emphasis
+                    <div class = "parameter">
+                        <div class = "parameter-name"></div>
+                        <div class = "parameter-min"></div>
+                        <div id="randomButton" class="button">RANDOMISE</div>
+                        <div class = "parameter-max"></div>
                     </div>
-                    <input type="range" id="emphasis" min="0.0" max="100.0">
-                    <div>
-                        global opacity mod</div>
-                    <input type="range" id="globalopacity" min="0.0" max="100.0">
-                </div> -->
 
+                    <div class = "parameters-group-header">COLONY INITIALISATION</div>
+                    <div class = "parameter">
+                        <div class = "parameter-name">seed count</div>
+                        <div class = "parameter-min">1</div>
+                        <input type="range" id="startingBranches" min="0" max="100.0">
+                        <div class = "parameter-max">400</div>
+                    </div>
+                    <div class = "parameter">
+                        <div class = "parameter-name">seed size (px)</div>
+                        <div class = "parameter-min">1px</div>
+                        <input type="range" id="startingSize" min="0" max="100.0">
+                        <div class = "parameter-max">30px</div>
+                    </div>
+                    <div class = "parameters-group-header">BRANCH SPLITTING</div>
+                    <div class = "parameter">
+                        <div class = "parameter-name">split probability</div>
+                        <div class = "parameter-min">0%</div>
+                        <input type="range" id="branchFactor" min="0.0" max="100.0">
+                        <div class = "parameter-max">10%</div>
+                    </div>
+                    <div class = "parameter">
+                        <div class = "parameter-name">split direction</div>
+                        <div class = "parameter-min">180 c</div>
+                        <input type="range" id="branchDirection" min="0.0" max="100.0">
+                        <div class = "parameter-max">180 cc</div>
+                    </div>
+                    <div class = "parameters-group-header">BRANCH GROWTH</div>
+                    <div class = "parameter">
+                        <div class = "parameter-name">colony spread</div>
+                        <div class = "parameter-min">small</div>
+                        <input type="range" id="gapSize" min="0.0" max="100.0">
+                        <div class = "parameter-max">big</div>
+                    </div>
+                    <!-- <div class = "parameter">
+                        <div class = "parameter-name">growth sine</div>
+                        <div class = "parameter-min">straight</div>
+                        <input type="range" id="sineMod" min="0.0" max="100.0">
+                        <div class = "parameter-max">full sine</div>
+                    </div> -->
+                    <div class = "parameter">
+                        <div class = "parameter-name">branch curve</div>
+                        <div class = "parameter-min">straight</div>
+                        <input type="range" id="curveMod" min="0.0" max="100.0">
+                        <div class = "parameter-max">+10°</div>
+                    </div>
+                    <div class = "parameter">
+                        <div class = "parameter-name">curve quality</div>
+                        <div class = "parameter-min">ordered</div>
+                        <input type="range" id="curveRandom" min="0.0" max="100.0">
+                        <div class = "parameter-max">chaotic</div>
+                    </div>
+                    <div class = "parameter">
+                        <div class = "parameter-name">branch longevity</div>
+                        <div class = "parameter-min">sooner</div>
+                        <input type="range" id="deathSize" min="0.0" max="100.0">
+                        <div class = "parameter-max">later</div>
+                    </div>
+                    <div class = "parameters-group-header">APPEARANCE</div>
+                    <div class = "parameter">
+                        <div class = "parameter-name">solidness</div>
+                        <div class = "parameter-min">hollow</div>
+                        <input type="range" id="solidness" min="0.1" max="100.0">
+                        <div class = "parameter-max">solid</div>
+                    </div>
+                    <div class = "parameter">
+                        <div class = "parameter-name">fatness</div>
+                        <div class = "parameter-min">slim</div>
+                        <input type="range" id="fatness" min="0.1" max="100.0">
+                        <div class = "parameter-max">dashed</div>
+                    </div>
+                    <div class = "parameter">
+                        <div class = "parameter-name">branch length</div>
+                        <div class = "parameter-min">short</div>
+                        <input type="range" id="pointSize" min="0.1" max="100.0">
+                        <div class = "parameter-max">long</div>
+                    </div>
+                    <div class = "parameter">
+                        <div class = "parameter-name">size quality</div>
+                        <div class = "parameter-min">ordered</div>
+                        <input type="range" id="pointSizeRandom" min="0.1" max="100.0">
+                        <div class = "parameter-max">chaotic</div>
+                    </div>
+                    <div class = "parameter">
+                        <div class = "parameter-name">color</div>
+                        <div class = "parameter-min"></div>
+                        <input type='text' id="color-picker" />
+                        <div class = "parameter-max"></div>
+                    </div>
+                    <div class = "parameter">
+                        <div class = "parameter-name"></div>
+                        <div class = "parameter-min"></div>
+                        <div id="upload-colony" class="button">UPLOAD COLONY</div>
+                        <div class = "parameter-max"></div>
+                    </div>
+                </div>
+
+                <div id="gallery">
+                    <h3>USER GENERATED COLONIES</h3>
+                    <h5>select two to breed</h5>
+                    <div id="grid"></div>
+                    <div id = "sourcedest">
+                        <div id="source" class="sourcedest"></div>
+                        <div id="dest" class="sourcedest"></div>
+                    <div>
+                </div>
+                        <!-- </div>
+                        <div id="source" class="sourcedest"></div>
+                        <div id="dest" class="sourcedest"></div>
+                        <div>
+                            emphasis
+                        </div>
+                        <input type="range" id="emphasis" min="0.0" max="100.0">
+                        <div>
+                            global opacity mod</div>
+                        <input type="range" id="globalopacity" min="0.0" max="100.0">
+                    </div> -->
+            </div>
         </div>
 
 

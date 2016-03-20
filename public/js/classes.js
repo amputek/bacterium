@@ -1,4 +1,4 @@
-var Colony, distance, random;
+var CENTER_X, CENTER_Y, Colony, distance, random;
 
 random = function(low, high) {
   return Math.random() * (high - low) + low;
@@ -7,6 +7,10 @@ random = function(low, high) {
 distance = function(x1, y1, x2, y2) {
   return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 };
+
+CENTER_X = 250;
+
+CENTER_Y = 250;
 
 Colony = (function() {
   var createPoint, getLastPointOfBranch, getSeedDirection;
@@ -82,9 +86,9 @@ Colony = (function() {
     if (position === "edge") {
       for (i = j = 0, ref = this.startingBranches; j <= ref; i = j += 1) {
         startAngle = random(0, Math.PI * 2);
-        startx = 300 + Math.sin(startAngle) * 280;
-        starty = 300 + Math.cos(startAngle) * 280;
-        facingangle = Math.atan2(startx - 300, starty - 300);
+        startx = CENTER_X + Math.sin(startAngle) * 230;
+        starty = CENTER_Y + Math.cos(startAngle) * 230;
+        facingangle = Math.atan2(startx - CENTER_X, starty - CENTER_Y);
         this.createBranch(createPoint(startx, starty, facingangle + Math.PI, this.startingSize));
       }
     }
@@ -92,16 +96,16 @@ Colony = (function() {
       for (i = k = 0, ref1 = this.startingBranches; k <= ref1; i = k += 1) {
         startAngle = random(0, Math.PI * 2);
         d = random(0, 40);
-        startx = 300 + Math.sin(startAngle) * d;
-        starty = 300 + Math.cos(startAngle) * d;
-        facingangle = Math.atan2(300 - startx, 300 - starty);
+        startx = CENTER_X + Math.sin(startAngle) * d;
+        starty = CENTER_Y + Math.cos(startAngle) * d;
+        facingangle = Math.atan2(startx - CENTER_X, starty - CENTER_Y);
         this.createBranch(createPoint(startx, starty, facingangle + Math.PI, this.startingSize));
       }
     }
     if (position === "line") {
       for (i = l = 0, ref2 = this.startingBranches; l <= ref2; i = l += 1) {
         dir = Math.PI * Math.round(random(0, 2));
-        this.createBranch(createPoint(random(0, 600), 300, dir, this.startingSize));
+        this.createBranch(createPoint(random(0, 500), CENTER_Y, dir, this.startingSize));
       }
     }
     if (position === "random") {
@@ -109,9 +113,9 @@ Colony = (function() {
       for (i = m = 0, ref3 = this.startingBranches; m <= ref3; i = m += 1) {
         startAngle = random(0, Math.PI * 2);
         d = random(0, 280);
-        startx = 300 + Math.sin(startAngle) * d;
-        starty = 300 + Math.cos(startAngle) * d;
-        facingangle = Math.atan2(300 - startx, 300 - starty);
+        startx = CENTER_X + Math.sin(startAngle) * d;
+        starty = CENTER_Y + Math.cos(startAngle) * d;
+        facingangle = Math.atan2(startx - CENTER_X, starty - CENTER_Y);
         results.push(this.createBranch(createPoint(startx, starty, facingangle + Math.PI, this.startingSize)));
       }
       return results;
@@ -133,7 +137,7 @@ Colony = (function() {
       newy = point.y + Math.cos(angle) * this.gapSize;
       newsize = point.si * this.childPointSize + random(-this.childPointSizeRandom, this.childPointSizeRandom);
       newpoint = createPoint(newx, newy, angle, newsize);
-      if (distance(newx, newy, 300, 300) > 300 || (newpoint.si < this.deathSize)) {
+      if (distance(newx, newy, CENTER_X, CENTER_Y) > 300 || (newpoint.si < this.deathSize)) {
         toKill.push(i);
       } else {
         branch.push(newpoint);

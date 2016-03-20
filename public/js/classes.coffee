@@ -6,6 +6,9 @@ random = (low, high) ->
 distance = (x1, y1, x2, y2) ->
     return Math.sqrt( Math.pow(x1-x2, 2) + Math.pow(y1-y2, 2))
 
+CENTER_X = 250
+CENTER_Y = 250
+
 #–----bacteria class------#
 class Colony
     constructor: ( ) ->
@@ -72,32 +75,32 @@ class Colony
         if( position == "edge" )
             for i in [0..@startingBranches] by 1
                 startAngle = random(0, Math.PI*2)
-                startx = 300 + Math.sin(startAngle) * 280;
-                starty =  300 + Math.cos(startAngle) * 280;
-                facingangle = Math.atan2(startx - 300, starty - 300);
+                startx = CENTER_X + Math.sin(startAngle) * 230;
+                starty =  CENTER_Y + Math.cos(startAngle) * 230;
+                facingangle = Math.atan2(startx - CENTER_X, starty - CENTER_Y);
                 @createBranch( createPoint(startx, starty, facingangle + Math.PI, @startingSize ) )
 
         if( position == "center" )
             for i in [0..@startingBranches] by 1
                 startAngle = random(0, Math.PI*2)
                 d = random(0,40)
-                startx = 300 + Math.sin(startAngle) * d;
-                starty =  300 + Math.cos(startAngle) * d;
-                facingangle = Math.atan2(300 - startx, 300 - starty);
+                startx = CENTER_X + Math.sin(startAngle) * d;
+                starty =  CENTER_Y + Math.cos(startAngle) * d;
+                facingangle = Math.atan2(startx - CENTER_X, starty - CENTER_Y);
                 @createBranch( createPoint(startx, starty, facingangle + Math.PI, @startingSize ) )
 
         if( position == "line" )
             for i in [0..@startingBranches] by 1
                 dir = Math.PI * Math.round( random(0,2) )
-                @createBranch( createPoint( random(0,600), 300, dir, @startingSize ) )
+                @createBranch( createPoint( random(0,500), CENTER_Y, dir, @startingSize ) )
 
         if( position == "random" )
             for i in [0..@startingBranches] by 1
                 startAngle = random(0, Math.PI*2)
                 d = random(0,280)
-                startx = 300 + Math.sin(startAngle) * d;
-                starty =  300 + Math.cos(startAngle) * d;
-                facingangle = Math.atan2(300 - startx, 300 - starty);
+                startx = CENTER_X + Math.sin(startAngle) * d;
+                starty =  CENTER_Y + Math.cos(startAngle) * d;
+                facingangle = Math.atan2(startx - CENTER_X, starty - CENTER_Y);
                 @createBranch( createPoint(startx, starty, facingangle + Math.PI, @startingSize ) )
 
     update: () ->
@@ -135,7 +138,7 @@ class Colony
             newpoint = createPoint( newx, newy, angle, newsize )
 
             #kill off branch if necessary...
-            if( distance(newx,newy,300,300) > 300 or (newpoint.si < @deathSize))
+            if( distance(newx,newy,CENTER_X,CENTER_Y) > 300 or (newpoint.si < @deathSize))
                 toKill.push( i )
             else
                 #----otherwise, add new point----#

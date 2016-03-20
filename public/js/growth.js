@@ -1,4 +1,4 @@
-var Canvas, ColonyParameters, breedMode, canvas, colonyParameters, currentColony, drawGrow, drawLoop, emphasis, frameCount, globalOpacityMod, growing, socket, startGrowing, time;
+var BreedSelector, Canvas, ColonyParameters, breedMode, breedSelector, canvas, colonyParameters, currentColony, drawGrow, drawLoop, emphasis, frameCount, globalOpacityMod, growing, socket, startGrowing, time;
 
 colonyParameters = null;
 
@@ -21,6 +21,8 @@ currentColony = null;
 canvas = null;
 
 socket = null;
+
+breedSelector = null;
 
 ColonyParameters = (function() {
   function ColonyParameters() {
@@ -113,8 +115,9 @@ ColonyParameters = (function() {
 Canvas = (function() {
   function Canvas() {
     this.canvas = document.getElementById('drawCanvas');
+    this.canvas.width = this.canvas.height = 500;
     this.ctx = this.canvas.getContext('2d');
-    this.grd = this.ctx.createRadialGradient(300, 300, 1, 300, 300, 300);
+    this.grd = this.ctx.createRadialGradient(250, 250, 1, 250, 250, 250);
     this.grd.addColorStop(0, '#16171A');
     this.grd.addColorStop(1, '#000000');
   }
@@ -123,8 +126,7 @@ Canvas = (function() {
     this.ctx.globalCompositeOperation = "source-over";
     this.ctx.strokeStyle = 'rgba(255,255,255,1.0)';
     this.ctx.fillStyle = "#000";
-    this.ctx.fillStyle = this.grd;
-    this.ctx.fillRect(0, 0, 610, 610);
+    this.ctx.fillRect(0, 0, 500, 500);
     return this.ctx.globalCompositeOperation = "lighter";
   };
 
@@ -138,19 +140,6 @@ Canvas = (function() {
     this.ctx.beginPath();
     this.ctx.arc(x, y, r, 0, 2 * Math.PI, false);
     return this.ctx.fill();
-  };
-
-  Canvas.prototype.arc = function(x, y, r, dir, length) {
-    this.ctx.beginPath();
-    this.ctx.arc(x, y, r, Math.PI / 2 + dir - length, Math.PI / 2 + dir + length, false);
-    return this.ctx.stroke();
-  };
-
-  Canvas.prototype.line = function(x, y, x2, y2) {
-    this.ctx.beginPath();
-    this.ctx.moveTo(x, y);
-    this.ctx.lineTo(x2, y2);
-    return this.ctx.stroke();
   };
 
   Canvas.prototype.drawPoint = function(red, green, blue, opacity, solidness, size, x, y, direction, fatness) {
@@ -198,6 +187,7 @@ window.onload = function() {
   currentColony = new Colony();
   colonyParameters = new ColonyParameters();
   canvas = new Canvas();
+  breedSelector = new BreedSelector();
   $('#drawCanvas').click(function() {
     if (breedMode === false) {
       startGrowing();
@@ -218,24 +208,93 @@ window.onload = function() {
     send = jQuery.extend({}, obj);
     return socket.emit('addBacteria', send, st);
   });
+  $('#grow-tab').click(function() {
+    $("#controls-wrapper").css("display", "inline-block");
+    $("#gallery").css("display", "none");
+    $("#breed-tab").removeClass("selected");
+    return $("#grow-tab").addClass("selected");
+  });
+  $('#breed-tab').click(function() {
+    $("#controls-wrapper").css("display", "none");
+    $("#gallery").css("display", "inline-block");
+    $("#breed-tab").addClass("selected");
+    return $("#grow-tab").removeClass("selected");
+  });
   socket = io.connect('http://192.168.1.198:8080');
   socket.emit('getColonyCollection');
-  socket.on('setColonyCollection', function(colonies) {
-    var col, colony, i, len, n, results;
-    console.log('colony collection: ', colonies);
-    document.getElementById("grid").innerHTML = "";
-    col = null;
-    results = [];
-    for (i = 0, len = colonies.length; i < len; i++) {
-      colony = colonies[i];
-      n = document.createElement("div");
-      n.setAttribute('id', colony.id);
-      n.setAttribute('class', 'gimg');
-      n.style.backgroundImage = "url(gallery/colony" + colony.id + ".png)";
-      results.push(document.getElementById("grid").appendChild(n));
-    }
-    return results;
-  });
   colonyParameters.randomise();
-  return canvas.clear();
+  return startGrowing();
 };
+
+socket.on('setColonyCollection', function(colonies) {
+  var col, colony, i, len, n, results;
+  console.log('colony collection: ', colonies);
+  document.getElementById("grid").innerHTML = "";
+  col = null;
+  results = [];
+  for (i = 0, len = colonies.length; i < len; i++) {
+    colony = colonies[i];
+    n = document.createElement("div");
+    n.addEventListener("click", breedSelector.clickImage, false);
+    n.setAttribute('id', colony.id);
+    n.setAttribute('class', 'gimg');
+    n.style.backgroundImage = "url(gallery/colony" + colony.id + ".png)";
+    results.push(document.getElementById("grid").appendChild(n));
+  }
+  return results;
+});
+
+BreedSelector = (function() {
+  var deselect, select, selectedColonies, updateSourceDest;
+
+  function BreedSelector() {}
+
+  selectedColonies = [null, null];
+
+  updateSourceDest = function() {
+    if (selectedColonies[0] !== null) {
+      $("#source").css("background-image", "url(gallery/colony" + selectedColonies[0] + ".png)");
+    } else {
+      $("#source").css("background-image", "none");
+    }
+    if (selectedColonies[1] !== null) {
+      return $("#dest").css("background-image", "url(gallery/colony" + selectedColonies[1] + ".png)");
+    } else {
+      return $("#dest").css("background-image", "none");
+    }
+  };
+
+  select = function(element) {
+    if (selectedColonies[0] === null) {
+      selectedColonies[0] = element.id;
+    } else if (selectedColonies[1] === null) {
+      selectedColonies[1] = element.id;
+    }
+    $(element).addClass("selected");
+    return updateSourceDest();
+  };
+
+  deselect = function(element, index) {
+    $(element).removeClass("selected");
+    selectedColonies[index] = null;
+    return updateSourceDest();
+  };
+
+  BreedSelector.prototype.clickImage = function(e) {
+    if (selectedColonies[0] !== e.target.id && selectedColonies[1] !== e.target.id) {
+      if (selectedColonies[0] === null || selectedColonies[1] === null) {
+        return select(e.target);
+      }
+    } else {
+      if (e.target.id === selectedColonies[1]) {
+        deselect(e.target, selectedColonies.length - 1);
+      }
+      if (e.target.id === selectedColonies[0]) {
+        return deselect(e.target, 0);
+      }
+    }
+  };
+
+  return BreedSelector;
+
+})();

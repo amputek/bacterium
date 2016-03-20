@@ -1,11 +1,13 @@
 /*@import url("http://fonts.googleapis.com/css?family=Open+Sans:400,600");*/
 html {
-  background: black;
+  background: #1b2026;
+  background: url('../img/noisy_net.png');
   color: #f8f8f8;
   font: 100 0.8em "Open Sans", sans-serif;
   -webkit-font-smoothing: antialiased;
   -webkit-text-size-adjust: 100%;
   letter-spacing: -0.4px;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
 }
 body {
   text-align: center;
@@ -29,12 +31,7 @@ hr {
   float: left;
 }
 #wrapper {
-  position: absolute;
-  left: 0;
-  top: 0;
-  margin: 0;
-  padding: 5px;
-  background: #1b2026;
+  padding: 10px;
   width: 1014px;
   height: 758px;
   text-align: left;
@@ -42,8 +39,10 @@ hr {
 }
 #bacteriaDiv {
   margin: 0;
-  width: 610px;
+  width: 500px;
   display: inline-block;
+  margin-right: 5px;
+  padding: 0px;
 }
 #bacteriaDiv #title-wrapper {
   letter-spacing: -7px;
@@ -70,22 +69,30 @@ hr {
 #bacteriaDiv #drawCanvas {
   margin: 0px;
   position: relative;
-  width: 610px;
-  height: 610px;
+  width: 500px;
+  height: 500px;
   overflow: visible;
   border-radius: 100%;
-  box-shadow: 0 0 0 2px white;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5);
   cursor: pointer;
 }
 #gallery {
   display: inline-block;
   overflow: hidden;
-  border: 1px solid white;
-  width: 400px;
-  padding: 20px;
-  height: 500px;
-  background: #1d2835;
+  width: 460px;
+  padding: 5px;
+  height: auto;
+  text-align: center;
   vertical-align: top;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+}
+#gallery h3 {
+  margin-bottom: 5px;
+}
+#gallery h5 {
+  font-weight: lighter;
+  margin-top: 5px;
 }
 #gallery #grid .gimg {
   display: inline-block;
@@ -93,64 +100,124 @@ hr {
   width: 80px;
   height: 80px;
   border-radius: 100%;
-  margin: 8px;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5);
+  margin: 3px;
   cursor: pointer;
 }
-#gallery #grid .gimg:hover {
-  box-shadow: 0 0 0 1px white;
+#gallery #grid .gimg.selected {
+  box-shadow: 0 0 0 2px white;
 }
-#controls-wrapper {
+#gallery #grid .gimg.selected:hover {
+  box-shadow: 0 0 0 2px white;
+}
+#gallery #grid .gimg:hover {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+#gallery #sourcedest {
+  display: inline-block;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  width: 300px;
+  margin-top: 20px;
+  padding-top: 20px;
+}
+#gallery #sourcedest .sourcedest {
+  display: inline-block;
+  background-color: black;
+  background-size: contain;
+  width: 120px;
+  height: 120px;
+  border-radius: 100%;
+}
+#controls-outer-wrapper {
   margin: 0;
   display: inline-block;
-  width: 390px;
+  width: 460px;
+  vertical-align: top;
+}
+#controls-outer-wrapper #tabs-wrapper {
+  width: 100%;
+  margin-bottom: 1px;
+}
+#controls-outer-wrapper #tabs-wrapper h4 {
+  display: inline-block;
+  font-weight: inherit;
+  font-size: 20px;
+  padding: 0;
+  margin: 0;
+  margin-right: 10px;
+}
+#controls-outer-wrapper #tabs-wrapper .tab {
+  display: inline-block;
+  padding: 10px;
+  font-size: 20px;
+  margin-right: 7px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.2);
+}
+#controls-outer-wrapper #tabs-wrapper .tab.selected {
+  background: rgba(0, 0, 0, 0.2);
+  color: white;
+}
+#controls-outer-wrapper #controls-wrapper {
+  margin: 0;
+  display: inline-block;
+  width: 460px;
   text-align: center;
   margin-left: 0px;
   margin-right: 0px;
-  margin-top: 60px;
   padding: 5px;
   vertical-align: top;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
 }
-#controls-wrapper .parameters-group-header {
+#controls-outer-wrapper #controls-wrapper .parameters-group-header {
   margin-top: 15px;
   margin-bottom: 10px;
+  width: 120px;
+  margin-left: 10px;
+  text-decoration: underline;
+  display: none;
 }
-#controls-wrapper .parameter {
+#controls-outer-wrapper #controls-wrapper .parameter {
   text-align: center;
   margin: 0;
   padding: 3px;
   margin-bottom: 4px;
   font-size: 14px;
 }
-#controls-wrapper .parameter .parameter-name {
+#controls-outer-wrapper #controls-wrapper .parameter .parameter-name {
   display: inline-block;
   font-weight: bolder;
-  width: 100px;
+  width: 120px;
   vertical-align: top;
 }
-#controls-wrapper .parameter .parameter-min,
-#controls-wrapper .parameter .parameter-max {
+#controls-outer-wrapper #controls-wrapper .parameter .parameter-min,
+#controls-outer-wrapper #controls-wrapper .parameter .parameter-max {
   display: inline-block;
   width: 50px;
 }
-#controls-wrapper .parameter .parameter-min {
+#controls-outer-wrapper #controls-wrapper .parameter .parameter-min {
   text-align: right;
 }
-#controls-wrapper .parameter .parameter-max {
+#controls-outer-wrapper #controls-wrapper .parameter .parameter-max {
   text-align: left;
 }
-#controls-wrapper .parameter input[type='range'] {
+#controls-outer-wrapper #controls-wrapper .parameter .button {
+  margin: 0;
+  width: 180px;
+}
+#controls-outer-wrapper #controls-wrapper .parameter input[type='range'] {
   display: inline-block;
   -webkit-appearance: none !important;
   height: 1px;
-  width: 160px;
+  width: 200px;
   background: rgba(255, 255, 255, 0.5);
   margin: 5px;
   vertical-align: bottom;
   cursor: pointer;
 }
-#controls-wrapper .parameter input[type='range']:after,
-#controls-wrapper .parameter input[type='range']:before {
+#controls-outer-wrapper #controls-wrapper .parameter input[type='range']:after,
+#controls-outer-wrapper #controls-wrapper .parameter input[type='range']:before {
   content: "";
   position: absolute;
   width: 1px;
@@ -158,7 +225,7 @@ hr {
   background: rgba(255, 255, 255, 0.5);
   margin-top: -8px;
 }
-#controls-wrapper .parameter input[type='range']::-webkit-slider-thumb {
+#controls-outer-wrapper #controls-wrapper .parameter input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none !important;
   background: #3e4956;
   height: 15px;
@@ -166,27 +233,27 @@ hr {
   border: solid;
   border-width: 1px;
   border-radius: 10px;
-  border-color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.5);
 }
-#controls-wrapper .parameter .minicolors-theme-picker {
+#controls-outer-wrapper #controls-wrapper .parameter .minicolors-theme-picker {
   margin-top: 5px;
   display: inline-block;
-  width: 160px;
+  width: 200px;
   text-align: left;
 }
-#controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel {
+#controls-outer-wrapper #controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel {
   border: none;
   background-color: transparent;
 }
-#controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel .minicolors-grid .minicolors-grid-inner {
+#controls-outer-wrapper #controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel .minicolors-grid .minicolors-grid-inner {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
 }
-#controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel .minicolors-slider,
-#controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel .minicolors-opacity-slider {
+#controls-outer-wrapper #controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel .minicolors-slider,
+#controls-outer-wrapper #controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel .minicolors-opacity-slider {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
 }
-#controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel .minicolors-slider .minicolors-picker,
-#controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel .minicolors-opacity-slider .minicolors-picker {
+#controls-outer-wrapper #controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel .minicolors-slider .minicolors-picker,
+#controls-outer-wrapper #controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel .minicolors-opacity-slider .minicolors-picker {
   background: #3e4956;
   border: none;
   box-shadow: 0 0 0 1px white;
@@ -196,22 +263,25 @@ hr {
   margin-top: -4px;
   border-radius: 8px;
 }
-#controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel .minicolors-slider {
-  margin-left: 2px;
+#controls-outer-wrapper #controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel .minicolors-slider {
+  margin-left: 28px;
 }
-#controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel .minicolors-opacity-slider {
+#controls-outer-wrapper #controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel .minicolors-opacity-slider {
   margin-left: 20px;
 }
 .button {
   text-align: center;
   font-size: 20;
   cursor: pointer;
-  background: #6f839a;
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.5);
   padding: 10px;
   display: inline-block;
+  background: #3e4956;
 }
 .button:hover {
-  background: #7eab55;
+  background: #697b91;
 }
 /*BUTTONS*/
 #buttonDiv {
@@ -230,8 +300,9 @@ hr {
   padding: 5px;
 }
 #buttonDiv #seed-position .switch {
-  margin: 5px;
-  color: #6f839a;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5);
+  margin: 1px;
+  color: rgba(255, 255, 255, 0.5);
   cursor: pointer;
   padding: 10px;
   display: inline-block;
@@ -243,7 +314,6 @@ hr {
   font-size: 15px;
 }
 #buttonDiv #seed-position input[type="radio"]:checked + .switch--on {
-  color: #fff;
-  background-color: #7eab55;
+  color: #3e4956;
+  background-color: rgba(255, 255, 255, 0.5);
 }
-/*---TABS-----*/

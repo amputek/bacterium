@@ -19,6 +19,7 @@ canvas = null
 
 socket = null
 
+breedSelector = null
 
 class ColonyParameters
     constructor: () ->
@@ -92,8 +93,9 @@ class ColonyParameters
 class Canvas
     constructor: () ->
         @canvas = document.getElementById 'drawCanvas'
+        @canvas.width = @canvas.height = 500
         @ctx = @canvas.getContext '2d'
-        @grd = @ctx.createRadialGradient(300,300,1,300,300,300);
+        @grd = @ctx.createRadialGradient(250,250,1,250,250,250);
         @grd.addColorStop(0, '#16171A');
         @grd.addColorStop(1, '#000000');
 
@@ -101,8 +103,7 @@ class Canvas
         @ctx.globalCompositeOperation = "source-over"
         @ctx.strokeStyle = 'rgba(255,255,255,1.0)'
         @ctx.fillStyle = "#000"
-        @ctx.fillStyle = @grd;
-        @ctx.fillRect(0,0,610,610);
+        @ctx.fillRect(0,0,500,500);
         @ctx.globalCompositeOperation = "lighter"
 
     strokedCircle : ( x, y, r) ->
@@ -114,17 +115,6 @@ class Canvas
         @ctx.beginPath()
         @ctx.arc x, y, r, 0, 2*Math.PI, false
         @ctx.fill()
-
-    arc : ( x, y, r, dir, length) ->
-        @ctx.beginPath()
-        @ctx.arc x, y, r, Math.PI/2 + dir-length, Math.PI/2 + dir + length, false
-        @ctx.stroke()
-
-    line : ( x, y, x2, y2) ->
-        @ctx.beginPath()
-        @ctx.moveTo(x,y)
-        @ctx.lineTo(x2,y2)
-        @ctx.stroke()
 
     drawPoint: (red,green,blue,opacity,solidness,size,x,y,direction,fatness) ->
 
@@ -178,14 +168,12 @@ drawGrow = () ->
         currentColony.draw( canvas );
 
 
-
-
-
 window.onload = ->
 
     currentColony = new Colony()
     colonyParameters = new ColonyParameters()
     canvas = new Canvas()
+    breedSelector = new BreedSelector()
 
     #--------button listeners--------#
     $('#drawCanvas').click( () ->
@@ -209,6 +197,19 @@ window.onload = ->
         socket.emit('addBacteria', send, st);
     )
 
+    $('#grow-tab').click( () ->
+        $("#controls-wrapper").css("display","inline-block")
+        $("#gallery").css("display","none")
+        $("#breed-tab").removeClass("selected");
+        $("#grow-tab").addClass("selected");
+    )
+
+    $('#breed-tab').click( () ->
+        $("#controls-wrapper").css("display","none")
+        $("#gallery").css("display","inline-block")
+        $("#breed-tab").addClass("selected");
+        $("#grow-tab").removeClass("selected");
+    )
 
     #----breed control------#
     # slider.emphasis = document.getElementById 'emphasis'
@@ -218,24 +219,7 @@ window.onload = ->
     socket = io.connect('http://192.168.1.198:8080');
     socket.emit('getColonyCollection')
 
-    #-------------recieve collection, get images-------#
-    socket.on('setColonyCollection', (colonies) ->
-        console.log('colony collection: ', colonies)
-        document.getElementById("grid").innerHTML = "";
-        col = null;
-        for colony in colonies
-            # if(i % 5 == 0)
-            # col = document.createElement("div")
-            # col.setAttribute('class', 'col')
-            # document.getElementById("grid").appendChild(col)
-            n = document.createElement("div");
-            # n.addEventListener("click", clickImage, false);
-            n.setAttribute('id', colony.id);
-            n.setAttribute('class', 'gimg');
-            n.style.backgroundImage = "url(gallery/colony" + colony.id + ".png)"
-            # n.selected = false;
-            document.getElementById("grid").appendChild(n)
-    )
+
 
 
 
@@ -246,4 +230,62 @@ window.onload = ->
     # sourceBacteria = new Bacteria( ctx )
 
     colonyParameters.randomise();
-    canvas.clear();
+    startGrowing();
+
+
+#-------------recieve collection, get images-------#
+socket.on('setColonyCollection', (colonies) ->
+    console.log('colony collection: ', colonies)
+    document.getElementById("grid").innerHTML = "";
+    col = null;
+    for colony in colonies
+        n = document.createElement("div");
+        n.addEventListener("click", breedSelector.clickImage, false);
+        n.setAttribute('id', colony.id);
+        n.setAttribute('class', 'gimg');
+        n.style.backgroundImage = "url(gallery/colony" + colony.id + ".png)"
+        document.getElementById("grid").appendChild(n)
+)
+
+
+
+class BreedSelector
+
+    constructor: () ->
+
+    selectedColonies = [null,null]
+
+    updateSourceDest = () ->
+        if( selectedColonies[0] != null )
+            $("#source").css("background-image","url(gallery/colony" + selectedColonies[0] + ".png)")
+        else
+            $("#source").css("background-image","none")
+
+        if( selectedColonies[1] != null )
+            $("#dest").css("background-image","url(gallery/colony" + selectedColonies[1] + ".png)")
+        else
+            $("#dest").css("background-image","none")
+
+    select = ( element ) ->
+        if( selectedColonies[0] == null)
+            selectedColonies[0] = element.id
+        else if( selectedColonies[1] == null)
+            selectedColonies[1] = element.id
+        $(element).addClass("selected")
+        updateSourceDest()
+
+
+    deselect = ( element, index ) ->
+        $(element).removeClass("selected")
+        selectedColonies[index] = null
+        updateSourceDest()
+
+    clickImage: (e) ->
+        if( selectedColonies[0] != e.target.id && selectedColonies[1] != e.target.id )
+            if( selectedColonies[0] == null || selectedColonies[1] == null )
+                select( e.target )
+        else
+            if(e.target.id == selectedColonies[1])
+                deselect( e.target, selectedColonies.length-1)
+            if(e.target.id == selectedColonies[0])
+                deselect( e.target, 0 )
