@@ -5,7 +5,7 @@
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
         <meta name="format-detection" content="telephone=no">
         <title>bacterium</title>
-        <!-- <script src="http://192.168.1.94:8080/socket.io/socket.io.js"></script> -->
+        <script src="http://192.168.1.198:8080/socket.io/socket.io.js"></script>
         <script src="js/jquery-2.1.3.min.js"></script>
         <script src='js/jquery.minicolors.js'></script>
         <link href='css/jquery.minicolors.css' rel='stylesheet' type="text/css" media="screen"/>
@@ -22,27 +22,22 @@
                     <span id="author">generative html5-canvas</span>
                 </div>
                 <canvas id="drawCanvas" width="602" height="602"></canvas>
-
                 <div id="buttonDiv">
-                    <!-- <div id="growButton" class="button">grow</div> -->
-                    <div class="radiodiv">
-                        start position:
-                        <input type="radio" name="startpos" id="edge" value="1" hidden="">
+                    <div id = "seed-position">
+                        <input id="edge" type="radio" name="startpos" hidden>
                         <label for="edge" class="switch switch--on" onclick="">edge</label>
-                        <input type="radio" name="startpos" id="center" value="1" hidden="" checked="">
-                        <label for="center" class="switch switch--on" onclick="">center</label>
-                        <input type="radio" name="startpos" id="line" value="1" hidden="">
-                        <label for="line" class="switch switch--on" onclick="">line</label>
+                        <input id="center" type="radio" name="startpos" checked hidden>
+                        <label for="center" class="switch switch--on">center</label>
+                        <input id="line" type="radio" name="startpos" hidden>
+                        <label for="line" class="switch switch--on">line</label>
+                        <input id="random" type="radio" name="startpos" hidden>
+                        <label for="random" class="switch switch--on">random</label>
+                        <!-- <h3>SEED POSITION</h3>                         -->
                     </div>
-                    <!-- growth time: -->
-                    <!-- <input type="range" style="width: 20%; margin-top: 30px" id="growTime" min="0.1" max="100.0"> -->
                 </div>
-
-
             </div>
 
             <div id="controls-wrapper">
-                <h3>COLONY PARAMETERS</h3>
                 <div class = "parameters-group-header">COLONY INITIALISATION</div>
                 <div class = "parameter">
                     <div class = "parameter-name">seed count</div>
@@ -71,41 +66,41 @@
                 </div>
                 <div class = "parameters-group-header">BRANCH GROWTH</div>
                 <div class = "parameter">
-                    <div class = "parameter-name">growth distance</div>
-                    <div class = "parameter-min">180 c</div>
+                    <div class = "parameter-name">colony spread</div>
+                    <div class = "parameter-min">small</div>
                     <input type="range" id="gapSize" min="0.0" max="100.0">
-                    <div class = "parameter-max">180 cc</div>
+                    <div class = "parameter-max">big</div>
                 </div>
-                <div class = "parameter">
+                <!-- <div class = "parameter">
                     <div class = "parameter-name">growth sine</div>
                     <div class = "parameter-min">straight</div>
                     <input type="range" id="sineMod" min="0.0" max="100.0">
                     <div class = "parameter-max">full sine</div>
-                </div>
+                </div> -->
                 <div class = "parameter">
-                    <div class = "parameter-name">growth direction</div>
+                    <div class = "parameter-name">branch curve</div>
                     <div class = "parameter-min">straight</div>
                     <input type="range" id="curveMod" min="0.0" max="100.0">
                     <div class = "parameter-max">+10°</div>
                 </div>
                 <div class = "parameter">
-                    <div class = "parameter-name">direction quality</div>
+                    <div class = "parameter-name">curve quality</div>
                     <div class = "parameter-min">ordered</div>
                     <input type="range" id="curveRandom" min="0.0" max="100.0">
                     <div class = "parameter-max">chaotic</div>
                 </div>
                 <div class = "parameter">
-                    <div class = "parameter-name">branch death size</div>
-                    <div class = "parameter-min">180 c</div>
+                    <div class = "parameter-name">branch longevity</div>
+                    <div class = "parameter-min">sooner</div>
                     <input type="range" id="deathSize" min="0.0" max="100.0">
-                    <div class = "parameter-max">180 cc</div>
+                    <div class = "parameter-max">later</div>
                 </div>
-                <div class = "parameters-group-header">INDIVIDUAL</div>
+                <div class = "parameters-group-header">APPEARANCE</div>
                 <div class = "parameter">
                     <div class = "parameter-name">solidness</div>
-                    <div class = "parameter-min">stroked</div>
+                    <div class = "parameter-min">hollow</div>
                     <input type="range" id="solidness" min="0.1" max="100.0">
-                    <div class = "parameter-max">filled</div>
+                    <div class = "parameter-max">solid</div>
                 </div>
                 <div class = "parameter">
                     <div class = "parameter-name">fatness</div>
@@ -114,44 +109,31 @@
                     <div class = "parameter-max">dashed</div>
                 </div>
                 <div class = "parameter">
-                    <div class = "parameter-name">size??</div>
-                    <div class = "parameter-min">180 c</div>
+                    <div class = "parameter-name">branch length</div>
+                    <div class = "parameter-min">short</div>
                     <input type="range" id="pointSize" min="0.1" max="100.0">
-                    <div class = "parameter-max">180 cc</div>
+                    <div class = "parameter-max">long</div>
                 </div>
                 <div class = "parameter">
-                    <div class = "parameter-name">size randomness</div>
+                    <div class = "parameter-name">size quality</div>
                     <div class = "parameter-min">ordered</div>
                     <input type="range" id="pointSizeRandom" min="0.1" max="100.0">
                     <div class = "parameter-max">chaotic</div>
                 </div>
                 <div class = "parameter">
                     <div class = "parameter-name">color</div>
-                    <div class = "parameter-min">a</div>
+                    <div class = "parameter-min"></div>
                     <input type='text' id="color-picker" />
-                    <div class = "parameter-max">a</div>
+                    <div class = "parameter-max"></div>
                 </div>
-                <hr size=1>
-                <div id="breedButton" class="button">UPLOAD COLONY</div>
-                <div id="randomButton" class="button">randomise</div>
+                <div id="upload-colony" class="button">UPLOAD COLONY</div>
+                <div id="randomButton" class="button">RANDOMISE</div>
             </div>
 
-
-            <!-- <div class="tabs"> -->
-                <!-- <div class="tab">
-                    <input type="radio" id="breedTab" name="tab-group-1" checked>
-                    <label for="breedTab" class="tablabel" onclick="">breeding</label>
-                    <div class="content">
-                        <div id="gallery" class="controls">
-                            <div id="grid"></div>
-                            <hr size=1>
-                            <div id="breedControls">
-                                <div>
-                                    parents
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <div id="gallery">
+                <div id="grid"></div>
+            </div>
+                    <!-- </div>
                     <div id="source" class="sourcedest"></div>
                     <div id="dest" class="sourcedest"></div>
                     <div>
@@ -162,11 +144,9 @@
                         global opacity mod</div>
                     <input type="range" id="globalopacity" min="0.0" max="100.0">
                 </div> -->
-                <!-- <div class="tab">
-                    <div class="content">
-                    </div>
-                </div> -->
-            </div>
+
         </div>
+
+
     </body>
 </html>

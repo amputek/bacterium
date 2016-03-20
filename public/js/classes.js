@@ -33,6 +33,28 @@ Colony = (function() {
     this.branches = [];
   }
 
+  Colony.prototype.getAsObj = function() {
+    return {
+      startingBranches: this.startingBranches,
+      startingSize: this.startingSize,
+      branchFactor: this.branchFactor,
+      branchDirectionMod: this.branchDirectionMod,
+      childPointSizeRandom: this.childPointSizeRandom,
+      solidness: this.solidness,
+      fatness: this.fatness,
+      childPointSize: this.childPointSize,
+      red: this.red,
+      green: this.green,
+      blue: this.blue,
+      opacity: this.opacity,
+      sineMod: this.sineMod,
+      gapSize: this.gapSize,
+      curveRandom: this.curveRandom,
+      curveMod: this.curveMod,
+      deathSize: this.deathSize
+    };
+  };
+
   createPoint = function(x, y, angle, size) {
     return {
       x: x,
@@ -55,7 +77,7 @@ Colony = (function() {
   };
 
   Colony.prototype.initSeeds = function(position) {
-    var d, dir, facingangle, i, j, k, l, ref, ref1, ref2, results, startAngle, startx, starty;
+    var d, dir, facingangle, i, j, k, l, m, ref, ref1, ref2, ref3, results, startAngle, startx, starty;
     this.branches = [];
     if (position === "edge") {
       for (i = j = 0, ref = this.startingBranches; j <= ref; i = j += 1) {
@@ -69,7 +91,7 @@ Colony = (function() {
     if (position === "center") {
       for (i = k = 0, ref1 = this.startingBranches; k <= ref1; i = k += 1) {
         startAngle = random(0, Math.PI * 2);
-        d = random(0, 430);
+        d = random(0, 40);
         startx = 300 + Math.sin(startAngle) * d;
         starty = 300 + Math.cos(startAngle) * d;
         facingangle = Math.atan2(300 - startx, 300 - starty);
@@ -77,27 +99,35 @@ Colony = (function() {
       }
     }
     if (position === "line") {
-      results = [];
       for (i = l = 0, ref2 = this.startingBranches; l <= ref2; i = l += 1) {
         dir = Math.PI * Math.round(random(0, 2));
-        results.push(this.createBranch(createPoint(random(0, 600), 300, dir, this.startingSize)));
+        this.createBranch(createPoint(random(0, 600), 300, dir, this.startingSize));
+      }
+    }
+    if (position === "random") {
+      results = [];
+      for (i = m = 0, ref3 = this.startingBranches; m <= ref3; i = m += 1) {
+        startAngle = random(0, Math.PI * 2);
+        d = random(0, 280);
+        startx = 300 + Math.sin(startAngle) * d;
+        starty = 300 + Math.cos(startAngle) * d;
+        facingangle = Math.atan2(300 - startx, 300 - starty);
+        results.push(this.createBranch(createPoint(startx, starty, facingangle + Math.PI, this.startingSize)));
       }
       return results;
     }
   };
 
   Colony.prototype.update = function() {
-    var a, angle, branch, curvepos, i, j, k, len, len1, newpoint, newsize, newx, newy, p, point, ref, results, sinepos, t, toKill;
+    var a, angle, branch, curvepos, i, j, k, len, len1, newpoint, newsize, newx, newy, point, ref, results, toKill;
     toKill = [];
     i = 0;
     ref = this.branches;
     for (j = 0, len = ref.length; j < len; j++) {
       branch = ref[j];
       point = getLastPointOfBranch(branch);
-      t = distance(point.x, point.y, 300, 300) * 0.001;
-      sinepos = getSeedDirection(branch) + Math.sin(branch.length * t) * (10.0 - point.si) * this.curveMod * 4.0;
       curvepos = point.dir + this.curveMod;
-      angle = (this.sineMod * sinepos) + ((1.0 - this.sineMod) * curvepos);
+      angle = curvepos;
       angle += random(-this.curveRandom, this.curveRandom);
       newx = point.x + Math.sin(angle) * this.gapSize;
       newy = point.y + Math.cos(angle) * this.gapSize;
@@ -109,8 +139,7 @@ Colony = (function() {
         branch.push(newpoint);
       }
       if (random(0.0, 1.0) < this.branchFactor) {
-        p = createPoint(point.x, point.y, point.dir + this.branchDirectionMod, point.si);
-        this.createBranch(p);
+        this.createBranch(createPoint(point.x, point.y, point.dir + this.branchDirectionMod, point.si));
       }
       i++;
     }
@@ -132,7 +161,7 @@ Colony = (function() {
       green = Math.round(this.green);
       blue = Math.round(this.blue);
       point = getLastPointOfBranch(branch);
-      results.push(canvas.drawPoint(red, green, blue, this.opacity, this.solidness, point.si, point.x, point.y, point.direction, fatness));
+      results.push(canvas.drawPoint(red, green, blue, this.opacity, this.solidness, point.si, point.x, point.y, point.dir, this.fatness));
     }
     return results;
   };

@@ -13,11 +13,11 @@ drawLoop = null;
 #growthmode vs breedmode
 breedMode = false;
 
-#–---current bacteria being drawn-----#
 currentColony = null;
-
-radio = {}
 canvas = null
+
+
+socket = null
 
 
 class ColonyParameters
@@ -35,7 +35,6 @@ class ColonyParameters
             curverandom : document.getElementById('curveRandom'),
             curvemod : document.getElementById('curveMod'),
             gapsize : document.getElementById('gapSize'),
-            sinemod : document.getElementById('sineMod'),
             deathsize : document.getElementById('deathSize')
         }
 
@@ -77,7 +76,7 @@ class ColonyParameters
         colony.branchFactor = @sliders.branchfactor.value * 0.0003;
         colony.branchDirectionMod = (Math.PI) + (  (@sliders.branchdirection.value / 15.915));
         colony.gapSize = @sliders.gapsize.value * 0.05 + 0.03;
-        colony.sineMod = @sliders.sinemod.value * 0.01;
+        # colony.sineMod = @sliders.sinemod.value * 0.01;
         colony.curveRandom = @sliders.curverandom.value * 0.01;
         colony.curveMod = @sliders.curvemod.value * 0.001;
         colony.deathSize = @sliders.deathsize.value * 0.01;
@@ -92,8 +91,8 @@ class ColonyParameters
 
 class Canvas
     constructor: () ->
-        @drawcanvas = document.getElementById 'drawCanvas'
-        @ctx = @drawcanvas.getContext '2d'
+        @canvas = document.getElementById 'drawCanvas'
+        @ctx = @canvas.getContext '2d'
         @grd = @ctx.createRadialGradient(300,300,1,300,300,300);
         @grd.addColorStop(0, '#16171A');
         @grd.addColorStop(1, '#000000');
@@ -147,7 +146,7 @@ class Canvas
         @ctx.translate(x,y);
 
         #–--orient to direction of point----#
-        @ctx.rotate( -direction + Math.PI/2);
+        @ctx.rotate( -direction + Math.PI/2 );
 
         #----scale depending on fatness----#
         @ctx.scale( 1 - fatness, 1 + fatness )
@@ -158,22 +157,15 @@ class Canvas
 
 startGrowing = () ->
 
-    #-----check position--------#
-    startPosition = "center"
-    if( radio.edge.checked == true)
-        startPosition = "edge"
-    if( radio.center.checked == true)
-        startPosition = "center"
-    if( radio.line.checked == true)
-        startPosition = "line"
+    canvas.clear();
 
     #------set up bacteria-----#
-    # currentColony = new Colony( )
     colonyParameters.setupColonyFromInputs( currentColony );
-    currentColony.initSeeds( startPosition );
+    currentColony.initSeeds( $("input:radio[name ='startpos']:checked").attr("id") );
 
     #----start drawing-----#
     frameCount = 0;
+    growing = true;
     window.clearInterval( drawLoop )
     drawLoop = setInterval( drawGrow, 1000/60 )
 
@@ -186,6 +178,9 @@ drawGrow = () ->
         currentColony.draw( canvas );
 
 
+
+
+
 window.onload = ->
 
     currentColony = new Colony()
@@ -194,29 +189,25 @@ window.onload = ->
 
     #--------button listeners--------#
     $('#drawCanvas').click( () ->
-        canvas.clear();
         if(breedMode == false)
             startGrowing();
         if(breedMode == true)
             startBreeding();
-        growing = true;
     )
 
     $('#randomButton').click( () ->
         colonyParameters.randomise();
-        canvas.clear();
         startGrowing();
-        growing = true;
     )
 
-
-    #-------draw area------------#
-
-
-    #---global inputs----#
-    radio.center = document.getElementById 'center'
-    radio.edge = document.getElementById 'edge'
-    radio.line = document.getElementById 'line'
+    #-----sends message to server with bacteria's parameters-----#
+    $('#upload-colony').click( () ->
+        console.log("adding colony: ", currentColony)
+        st = canvas.canvas.toDataURL();
+        obj = currentColony.getAsObj()
+        send = jQuery.extend({},obj)
+        socket.emit('addBacteria', send, st);
+    )
 
 
     #----breed control------#
@@ -224,9 +215,28 @@ window.onload = ->
     # slider.globalopacity = document.getElementById 'globalopacity'
 
     #----node server stuff------#
-    # socket = null;
-    # socket = io.connect('http://192.168.1.94:8080');
-    # socket.emit('getBacteriaCollection')
+    socket = io.connect('http://192.168.1.198:8080');
+    socket.emit('getColonyCollection')
+
+    #-------------recieve collection, get images-------#
+    socket.on('setColonyCollection', (colonies) ->
+        console.log('colony collection: ', colonies)
+        document.getElementById("grid").innerHTML = "";
+        col = null;
+        for colony in colonies
+            # if(i % 5 == 0)
+            # col = document.createElement("div")
+            # col.setAttribute('class', 'col')
+            # document.getElementById("grid").appendChild(col)
+            n = document.createElement("div");
+            # n.addEventListener("click", clickImage, false);
+            n.setAttribute('id', colony.id);
+            n.setAttribute('class', 'gimg');
+            n.style.backgroundImage = "url(gallery/colony" + colony.id + ".png)"
+            # n.selected = false;
+            document.getElementById("grid").appendChild(n)
+    )
+
 
 
 

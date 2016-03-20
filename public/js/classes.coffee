@@ -33,6 +33,27 @@ class Colony
         @deathSize = 0.01;
         @branches = [];
 
+    getAsObj: () ->
+        return {
+            startingBranches : @startingBranches,
+            startingSize : @startingSize,
+            branchFactor : @branchFactor,
+            branchDirectionMod : @branchDirectionMod,
+            childPointSizeRandom : @childPointSizeRandom,
+            solidness : @solidness,
+            fatness : @fatness,
+            childPointSize : @childPointSize,
+            red : @red,
+            green : @green,
+            blue : @blue,
+            opacity : @opacity,
+            sineMod : @sineMod,
+            gapSize : @gapSize,
+            curveRandom : @curveRandom,
+            curveMod : @curveMod,
+            deathSize : @deathSize
+        }
+
     createPoint = ( x, y, angle, size ) ->
         return { x: x, y: y, dir: angle, si: size }
 
@@ -59,17 +80,25 @@ class Colony
         if( position == "center" )
             for i in [0..@startingBranches] by 1
                 startAngle = random(0, Math.PI*2)
-                d = random(0,430)
+                d = random(0,40)
                 startx = 300 + Math.sin(startAngle) * d;
                 starty =  300 + Math.cos(startAngle) * d;
                 facingangle = Math.atan2(300 - startx, 300 - starty);
                 @createBranch( createPoint(startx, starty, facingangle + Math.PI, @startingSize ) )
-                # @createBranch( createPoint( 300, 300, Math.random() * Math.PI*2, @startingSize ) )
 
         if( position == "line" )
             for i in [0..@startingBranches] by 1
                 dir = Math.PI * Math.round( random(0,2) )
                 @createBranch( createPoint( random(0,600), 300, dir, @startingSize ) )
+
+        if( position == "random" )
+            for i in [0..@startingBranches] by 1
+                startAngle = random(0, Math.PI*2)
+                d = random(0,280)
+                startx = 300 + Math.sin(startAngle) * d;
+                starty =  300 + Math.cos(startAngle) * d;
+                facingangle = Math.atan2(300 - startx, 300 - starty);
+                @createBranch( createPoint(startx, starty, facingangle + Math.PI, @startingSize ) )
 
     update: () ->
 
@@ -81,14 +110,16 @@ class Colony
             point = getLastPointOfBranch( branch );
 
             #---calculate position based on sine method, needs the starting direction of the branch---#
-            t = distance( point.x, point.y, 300, 300) * 0.001
-            sinepos = getSeedDirection(branch) + Math.sin( branch.length * t ) * (10.0-point.si)*@curveMod*4.0;
+            # t = distance( point.x, point.y, 300, 300) * 0.001
+            # sinepos = getSeedDirection(branch) + Math.sin( branch.length * t ) * (10.0-point.si)*@curveMod*4.0;
 
             #---calculate position based on curve - just uses last point's direction----#
             curvepos = point.dir + @curveMod;
 
             #---interpolate between them---#
-            angle = (@sineMod * sinepos) + ( (1.0-@sineMod) * curvepos);
+            # angle = (@sineMod * sinepos) + ( (1.0-@sineMod) * curvepos);
+
+            angle = curvepos;
 
             #----add random number-----#
             angle += random(-@curveRandom, @curveRandom)
@@ -112,8 +143,7 @@ class Colony
 
             #----create new branch------#
             if(random(0.0,1.0) < @branchFactor)
-                p = createPoint( point.x, point.y, point.dir + @branchDirectionMod, point.si )
-                @createBranch( p )
+                @createBranch( createPoint( point.x, point.y, point.dir + @branchDirectionMod, point.si ) )
 
             i++
 
@@ -129,4 +159,4 @@ class Colony
             green = Math.round(@green)
             blue = Math.round(@blue)
             point = getLastPointOfBranch( branch );
-            canvas.drawPoint(red,green,blue,@opacity,@solidness,point.si,point.x,point.y,point.direction,fatness)
+            canvas.drawPoint(red,green,blue,@opacity,@solidness,point.si,point.x,point.y,point.dir,@fatness)

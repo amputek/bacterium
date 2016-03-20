@@ -1,4 +1,4 @@
-var Canvas, ColonyParameters, breedMode, canvas, colonyParameters, currentColony, drawGrow, drawLoop, emphasis, frameCount, globalOpacityMod, growing, radio, startGrowing, time;
+var Canvas, ColonyParameters, breedMode, canvas, colonyParameters, currentColony, drawGrow, drawLoop, emphasis, frameCount, globalOpacityMod, growing, socket, startGrowing, time;
 
 colonyParameters = null;
 
@@ -18,9 +18,9 @@ breedMode = false;
 
 currentColony = null;
 
-radio = {};
-
 canvas = null;
+
+socket = null;
 
 ColonyParameters = (function() {
   function ColonyParameters() {
@@ -43,7 +43,6 @@ ColonyParameters = (function() {
       curverandom: document.getElementById('curveRandom'),
       curvemod: document.getElementById('curveMod'),
       gapsize: document.getElementById('gapSize'),
-      sinemod: document.getElementById('sineMod'),
       deathsize: document.getElementById('deathSize')
     };
     _this = this;
@@ -94,7 +93,6 @@ ColonyParameters = (function() {
     colony.branchFactor = this.sliders.branchfactor.value * 0.0003;
     colony.branchDirectionMod = Math.PI + (this.sliders.branchdirection.value / 15.915);
     colony.gapSize = this.sliders.gapsize.value * 0.05 + 0.03;
-    colony.sineMod = this.sliders.sinemod.value * 0.01;
     colony.curveRandom = this.sliders.curverandom.value * 0.01;
     colony.curveMod = this.sliders.curvemod.value * 0.001;
     colony.deathSize = this.sliders.deathsize.value * 0.01;
@@ -114,8 +112,8 @@ ColonyParameters = (function() {
 
 Canvas = (function() {
   function Canvas() {
-    this.drawcanvas = document.getElementById('drawCanvas');
-    this.ctx = this.drawcanvas.getContext('2d');
+    this.canvas = document.getElementById('drawCanvas');
+    this.ctx = this.canvas.getContext('2d');
     this.grd = this.ctx.createRadialGradient(300, 300, 1, 300, 300, 300);
     this.grd.addColorStop(0, '#16171A');
     this.grd.addColorStop(1, '#000000');
@@ -179,20 +177,11 @@ Canvas = (function() {
 })();
 
 startGrowing = function() {
-  var startPosition;
-  startPosition = "center";
-  if (radio.edge.checked === true) {
-    startPosition = "edge";
-  }
-  if (radio.center.checked === true) {
-    startPosition = "center";
-  }
-  if (radio.line.checked === true) {
-    startPosition = "line";
-  }
+  canvas.clear();
   colonyParameters.setupColonyFromInputs(currentColony);
-  currentColony.initSeeds(startPosition);
+  currentColony.initSeeds($("input:radio[name ='startpos']:checked").attr("id"));
   frameCount = 0;
+  growing = true;
   window.clearInterval(drawLoop);
   return drawLoop = setInterval(drawGrow, 1000 / 60);
 };
@@ -210,24 +199,43 @@ window.onload = function() {
   colonyParameters = new ColonyParameters();
   canvas = new Canvas();
   $('#drawCanvas').click(function() {
-    canvas.clear();
     if (breedMode === false) {
       startGrowing();
     }
     if (breedMode === true) {
-      startBreeding();
+      return startBreeding();
     }
-    return growing = true;
   });
   $('#randomButton').click(function() {
     colonyParameters.randomise();
-    canvas.clear();
-    startGrowing();
-    return growing = true;
+    return startGrowing();
   });
-  radio.center = document.getElementById('center');
-  radio.edge = document.getElementById('edge');
-  radio.line = document.getElementById('line');
+  $('#upload-colony').click(function() {
+    var obj, send, st;
+    console.log("adding colony: ", currentColony);
+    st = canvas.canvas.toDataURL();
+    obj = currentColony.getAsObj();
+    send = jQuery.extend({}, obj);
+    return socket.emit('addBacteria', send, st);
+  });
+  socket = io.connect('http://192.168.1.198:8080');
+  socket.emit('getColonyCollection');
+  socket.on('setColonyCollection', function(colonies) {
+    var col, colony, i, len, n, results;
+    console.log('colony collection: ', colonies);
+    document.getElementById("grid").innerHTML = "";
+    col = null;
+    results = [];
+    for (i = 0, len = colonies.length; i < len; i++) {
+      colony = colonies[i];
+      n = document.createElement("div");
+      n.setAttribute('id', colony.id);
+      n.setAttribute('class', 'gimg');
+      n.style.backgroundImage = "url(gallery/colony" + colony.id + ".png)";
+      results.push(document.getElementById("grid").appendChild(n));
+    }
+    return results;
+  });
   colonyParameters.randomise();
   return canvas.clear();
 };

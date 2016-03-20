@@ -1,11 +1,11 @@
 /*@import url("http://fonts.googleapis.com/css?family=Open+Sans:400,600");*/
 html {
-  background: #1b2026;
+  background: black;
   color: #f8f8f8;
   font: 100 0.8em "Open Sans", sans-serif;
   -webkit-font-smoothing: antialiased;
   -webkit-text-size-adjust: 100%;
-  letter-spacing: -0.8px;
+  letter-spacing: -0.4px;
 }
 body {
   text-align: center;
@@ -29,8 +29,14 @@ hr {
   float: left;
 }
 #wrapper {
-  width: 1275px;
-  height: auto;
+  position: absolute;
+  left: 0;
+  top: 0;
+  margin: 0;
+  padding: 5px;
+  background: #1b2026;
+  width: 1014px;
+  height: 758px;
   text-align: left;
   display: inline-block;
 }
@@ -70,18 +76,40 @@ hr {
   border-radius: 100%;
   box-shadow: 0 0 0 2px white;
   cursor: pointer;
-  margin-bottom: 20px;
+}
+#gallery {
+  display: inline-block;
+  overflow: hidden;
+  border: 1px solid white;
+  width: 400px;
+  padding: 20px;
+  height: 500px;
+  background: #1d2835;
+  vertical-align: top;
+}
+#gallery #grid .gimg {
+  display: inline-block;
+  background-size: contain;
+  width: 80px;
+  height: 80px;
+  border-radius: 100%;
+  margin: 8px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+}
+#gallery #grid .gimg:hover {
+  box-shadow: 0 0 0 1px white;
 }
 #controls-wrapper {
   margin: 0;
   display: inline-block;
-  vertical-align: top;
-  background: #1d2835;
-  width: 440px;
+  width: 390px;
   text-align: center;
-  border: 1px solid white;
-  margin-left: 20px;
-  padding: 10px;
+  margin-left: 0px;
+  margin-right: 0px;
+  margin-top: 60px;
+  padding: 5px;
+  vertical-align: top;
 }
 #controls-wrapper .parameters-group-header {
   margin-top: 15px;
@@ -90,13 +118,14 @@ hr {
 #controls-wrapper .parameter {
   text-align: center;
   margin: 0;
-  padding: 5px;
-  font-size: 15px;
+  padding: 3px;
+  margin-bottom: 4px;
+  font-size: 14px;
 }
 #controls-wrapper .parameter .parameter-name {
   display: inline-block;
   font-weight: bolder;
-  width: 120px;
+  width: 100px;
   vertical-align: top;
 }
 #controls-wrapper .parameter .parameter-min,
@@ -114,7 +143,7 @@ hr {
   display: inline-block;
   -webkit-appearance: none !important;
   height: 1px;
-  width: 180px;
+  width: 160px;
   background: rgba(255, 255, 255, 0.5);
   margin: 5px;
   vertical-align: bottom;
@@ -142,7 +171,7 @@ hr {
 #controls-wrapper .parameter .minicolors-theme-picker {
   margin-top: 5px;
   display: inline-block;
-  width: 180px;
+  width: 160px;
   text-align: left;
 }
 #controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel {
@@ -168,7 +197,7 @@ hr {
   border-radius: 8px;
 }
 #controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel .minicolors-slider {
-  margin-left: 10px;
+  margin-left: 2px;
 }
 #controls-wrapper .parameter .minicolors-theme-picker .minicolors-panel .minicolors-opacity-slider {
   margin-left: 20px;
@@ -186,28 +215,22 @@ hr {
 }
 /*BUTTONS*/
 #buttonDiv {
-  text-align: center;
-  width: 100$;
-  border: 1px solid white;
-  padding: 10px;
-}
-#buttonDiv .button {
-  text-align: center;
-  font-size: 20;
-  cursor: pointer;
-  background: #6f839a;
-  padding: 10px;
   display: inline-block;
-}
-#buttonDiv .button:hover {
-  background: #7eab55;
-}
-#buttonDiv .radioDiv {
   text-align: center;
-  display: inline;
-  width: 250px;
+  width: 100%;
 }
-#buttonDiv .radioDiv .switch {
+#buttonDiv h3 {
+  margin: 5px;
+}
+#buttonDiv #seed-position {
+  text-align: center;
+  display: inline-block;
+  width: 330px;
+  margin-left: 10px;
+  padding: 5px;
+}
+#buttonDiv #seed-position .switch {
+  margin: 5px;
   color: #6f839a;
   cursor: pointer;
   padding: 10px;
@@ -217,120 +240,10 @@ hr {
   line-height: 50px;
   height: 50px;
   width: 50px;
+  font-size: 15px;
 }
-#buttonDiv .radioDiv input[type="radio"]:checked + .switch--on {
+#buttonDiv #seed-position input[type="radio"]:checked + .switch--on {
   color: #fff;
   background-color: #7eab55;
 }
-/*SLIDERS*/
-/*RADIO BUTTON*/
-/*----gallery----*/
-#grid {
-  height: 370px;
-  margin-left: 12px;
-  margin-top: 15px;
-  overflow: visible;
-}
-#gallery {
-  height: 600px;
-}
-#breedControls {
-  height: 150px;
-  width: 330px;
-  float: bottom;
-}
-#emphasis {
-  width: 80%;
-  float: center;
-  margin-bottom: 10px;
-}
-#globalopacity {
-  width: 80%;
-  float: center;
-}
-.sourcedest {
-  position: relative;
-  height: 80px;
-  width: 80px;
-  border-radius: 80px;
-  background-color: black;
-  border: solid;
-  text-align: center;
-  display: inline-block;
-  margin-left: 10px;
-  margin-right: 10px;
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-.col {
-  float: left;
-  width: 90px;
-  overflow: visible;
-  margin-right: -8px;
-}
-.gimg {
-  overflow: hidden;
-  position: relative;
-  margin: -10px;
-  background-size: 80%;
-  background-repeat: no-repeat;
-  background-position: center center;
-  width: 80px;
-  height: 80px;
-  opacity: 0.6;
-  border-style: solid;
-  border-color: rgba(255, 255, 255, 0);
-  border-width: 2px;
-  border-radius: 60px;
-  transition: background-size 0.25s ease, opacity 0.25s ease, border-width 0.25s ease;
-}
-.gimg:hover {
-  background-size: 90%;
-  opacity: 0.8;
-}
 /*---TABS-----*/
-.tabs {
-  position: relative;
-  /*float: right;*/
-  margin: 25px 0;
-  border: 1px solid green;
-}
-.tab {
-  float: left;
-}
-.tablabel {
-  z-index: 0;
-  font-size: 16px;
-  background: #1b2026;
-  line-height: 13px;
-  padding: 5px;
-  padding-bottom: 5px;
-  border: 4px solid #fff;
-  border-top-left-radius: 10px;
-  border-bottom: none;
-  margin-left: -1px;
-  position: relative;
-  left: 2px;
-}
-.tab [type=radio] {
-  display: none;
-}
-.content {
-  background-color: #1b2026;
-  height: 620px;
-  width: 350px;
-  top: 19px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  overflow: visible;
-}
-input[type=radio]:checked ~ label {
-  height: 200px;
-  background: #1d2835;
-  z-index: 2;
-}
-input[type=radio]:checked ~ label ~ .content {
-  z-index: 1;
-}
