@@ -1,25 +1,16 @@
 colonyParameters = null
-
-#----growth variables----------#
-frameCount = 0;
-time = 200;
-growing = false;
 emphasis = 0.0;
 globalOpacityMod = 1.0;
-
-#current active drawloop
 drawLoop = null;
-
-#growthmode vs breedmode
-breedMode = false;
-
+mode = "grow"
 currentColony = null;
 canvas = null
-
-
 socket = null
-
+breedColonies = {}
 breedSelector = null
+breeder = null
+frameCount = 0
+
 
 class ColonyParameters
     constructor: () ->
@@ -40,8 +31,6 @@ class ColonyParameters
         }
 
         _this = @
-
-
         $('#color-picker').minicolors({
             change: ( value, opacity) ->
                 s = value.substring(4,value.length-1);
@@ -68,7 +57,7 @@ class ColonyParameters
         for k, val of @sliders
             if( val != null )
                 val.value = Math.random() * 100.0;
-        $('#color-picker').minicolors('value', { color: 'rgb(' + Math.round(Math.random()*255) + ',' + Math.round(Math.random()*255) + ',' + Math.round(Math.random()*255) + ')' });
+        $('#color-picker').minicolors('value', { color: 'rgb(' + Math.round(Math.random()*205) + ',' + Math.round(Math.random()*205) + ',' + Math.round(Math.random()*205) + ')' });
 
 
     setupColonyFromInputs : ( colony ) ->
@@ -118,6 +107,10 @@ class Canvas
 
     drawPoint: (red,green,blue,opacity,solidness,size,x,y,direction,fatness) ->
 
+        red = Math.round(red)
+        green = Math.round(green)
+        blue = Math.round(blue)
+
         #----center and edge opacity from solidness parameter---#
         centerop = opacity * solidness
         edgeop = opacity * (1.0 - solidness)
@@ -140,32 +133,108 @@ class Canvas
 
         #----scale depending on fatness----#
         @ctx.scale( 1 - fatness, 1 + fatness )
-        @solidCircle( 0 , 0, size )
-        @strokedCircle( 0 ,0, size )
+        @solidCircle( 0 , 0 , size )
+        @strokedCircle( 0 , 0 , size )
         @ctx.restore()
 
+class Breeder
+    constructor: () ->
+        @source = new Colony()
+        @dest = new Colony()
+        @emphasis = 0.0
+        @globalOpacityMod = 1.0
 
-startGrowing = () ->
+    setSource: ( c ) ->
+        @source = breedColonies[ c ]
 
+    setDest: ( c ) ->
+        @dest = breedColonies[ c ]
+
+
+    #--interpolates between two values (source, destination)--#
+    interpolate: (source, destination) ->
+        time = 150
+        rate = -@emphasis;
+        result = source
+
+        aswitch = 150 * -@emphasis
+
+        if( @emphasis >= 0.0)
+            if( frameCount < aswitch)
+                result = source;
+            else
+                step = (destination - source) / time;
+                result = source + (step * (frameCount-(time*rate)))
+        else
+            rate = 1.0 + rate;
+            if( frameCount < aswitch )
+                step = (destination - source) / (time*rate)
+                result = source + (step * frameCount)
+            else
+                result = destination
+
+        return result
+
+
+    interpolateSettings: ( colony ) ->
+        #----interpolate for each of the evolveable parameters------#
+        colony.branchFactor = @interpolate(@source.branchFactor, @dest.branchFactor)
+        colony.branchDirectionMod = @interpolate(@source.branchDirectionMod, @dest.branchDirectionMod)
+        colony.solidness = @interpolate(@source.solidness, @dest.solidness)
+        colony.fatness = @interpolate(@source.fatness, @dest.fatness)
+        colony.childPointSize = @interpolate(@source.childPointSize, @dest.childPointSize)
+        colony.childPointSizeRandom = @interpolate(@source.childPointSizeRandom, @dest.childPointSizeRandom)
+        colony.red = @interpolate(@source.red, @dest.red) + random(-10,10)
+        colony.green = @interpolate(@source.green, @dest.green) + random(-10,10)
+        colony.blue = @interpolate(@source.blue, @dest.blue) + random(-10,10)
+        colony.opacity = @interpolate(@source.opacity, @dest.opacity)
+        colony.opacity *= @globalOpacityMod;
+        colony.gapSize = @interpolate(@source.gapSize, @dest.gapSize)
+        colony.sineMod = @interpolate(@source.sineMod, @dest.sineMod)
+        colony.curveMod = @interpolate(@source.curveMod, @dest.curveMod)
+        colony.curveRandom = @interpolate(@source.curveRandom, @dest.curveRandom)
+        return colony
+
+
+start = () ->
+    frameCount = 0
+    window.clearInterval( drawLoop )
     canvas.clear();
 
-    #------set up bacteria-----#
-    colonyParameters.setupColonyFromInputs( currentColony );
+    if( mode == "breed" )
+        #----initialise bacteria variables-----#
+        if( !breedSelector.ableToBreed() )
+            return
+        currentColony.deathSize = (breeder.source.deathSize + breeder.dest.deathSize) / 2;
+        currentColony.startingBranches = breeder.source.startingBranches;
+        currentColony.startingSize = breeder.source.startingSize;
+
+        #-----growth variables------#
+        breeder.globalOpacityMod = document.getElementById('opacity-mod').value * 0.008 + 0.2
+        breeder.emphasis = document.getElementById('emphasis').value * 0.02 - 1.0;
+        console.log(breeder.emphasis)
+    else
+        colonyParameters.setupColonyFromInputs( currentColony );
+
     currentColony.initSeeds( $("input:radio[name ='startpos']:checked").attr("id") );
 
     #----start drawing-----#
-    frameCount = 0;
-    growing = true;
-    window.clearInterval( drawLoop )
-    drawLoop = setInterval( drawGrow, 1000/60 )
+    drawLoop = setInterval( draw, 1000/60 )
 
 
-#---draw method for "grow mode"---#
-drawGrow = () ->
-    if(growing == true && frameCount < 500)
-        frameCount++;
+
+
+draw = () ->
+    if( currentColony.numberOfBranches() > 0 && frameCount <= 200 )
+        if( mode == "breed" )
+            currentColony = breeder.interpolateSettings( currentColony )
         currentColony.update()
         currentColony.draw( canvas );
+        frameCount++
+    else
+        console.log frameCount
+        frameCount = 0
+        window.clearInterval( drawLoop )
 
 
 window.onload = ->
@@ -174,18 +243,14 @@ window.onload = ->
     colonyParameters = new ColonyParameters()
     canvas = new Canvas()
     breedSelector = new BreedSelector()
+    breeder = new Breeder()
 
     #--------button listeners--------#
-    $('#drawCanvas').click( () ->
-        if(breedMode == false)
-            startGrowing();
-        if(breedMode == true)
-            startBreeding();
-    )
+    $('#drawCanvas').click( start )
 
     $('#randomButton').click( () ->
         colonyParameters.randomise();
-        startGrowing();
+        start()
     )
 
     #-----sends message to server with bacteria's parameters-----#
@@ -202,6 +267,8 @@ window.onload = ->
         $("#gallery").css("display","none")
         $("#breed-tab").removeClass("selected");
         $("#grow-tab").addClass("selected");
+        window.clearInterval( drawLoop )
+        mode = "grow"
     )
 
     $('#breed-tab').click( () ->
@@ -209,6 +276,8 @@ window.onload = ->
         $("#gallery").css("display","inline-block")
         $("#breed-tab").addClass("selected");
         $("#grow-tab").removeClass("selected");
+        window.clearInterval( drawLoop )
+        mode = "breed"
     )
 
     #----breed control------#
@@ -216,36 +285,40 @@ window.onload = ->
     # slider.globalopacity = document.getElementById 'globalopacity'
 
     #----node server stuff------#
+    socket = null
     socket = io.connect('http://192.168.1.198:8080');
     socket.emit('getColonyCollection')
 
 
+
+    #-------------recieve collection, get images-------#
+    socket.on('setColonyCollection', (colonies) ->
+        console.log('colony collection: ', colonies)
+        document.getElementById("grid").innerHTML = "";
+        col = null;
+        for colony in colonies
+            breedColonies[ "" + colony.id ] = colony
+            console.log("adding colony",colony.id)
+            n = document.createElement("div");
+            n.addEventListener("click", breedSelector.clickImage, false);
+            n.setAttribute('id', colony.id);
+            n.setAttribute('class', 'gimg');
+            n.style.backgroundImage = "url(gallery/colony" + colony.id + ".png)"
+            document.getElementById("grid").appendChild(n)
+        console.log(breedColonies)
+    )
 
 
 
 
     #--for breeding, the current bacteria interpolates between source and destination
     # selectedBacteria = [];
-    # destinationBacteria = new Bacteria( ctx )
-    # sourceBacteria = new Bacteria( ctx )
+    # @dest = new Bacteria( ctx )
+    # @source = new Bacteria( ctx )
 
     colonyParameters.randomise();
-    startGrowing();
+    start()
 
-
-#-------------recieve collection, get images-------#
-socket.on('setColonyCollection', (colonies) ->
-    console.log('colony collection: ', colonies)
-    document.getElementById("grid").innerHTML = "";
-    col = null;
-    for colony in colonies
-        n = document.createElement("div");
-        n.addEventListener("click", breedSelector.clickImage, false);
-        n.setAttribute('id', colony.id);
-        n.setAttribute('class', 'gimg');
-        n.style.backgroundImage = "url(gallery/colony" + colony.id + ".png)"
-        document.getElementById("grid").appendChild(n)
-)
 
 
 
@@ -253,18 +326,34 @@ class BreedSelector
 
     constructor: () ->
 
+        $("#swap-source-dest").click(()->
+            p1 = selectedColonies[1]
+            p0 = selectedColonies[0]
+            selectedColonies[0] = p1
+            selectedColonies[1] = p0
+            updateSourceDest()
+        )
+
     selectedColonies = [null,null]
+
+
+    ableToBreed: () ->
+        return selectedColonies[0] != null && selectedColonies[1] != null
 
     updateSourceDest = () ->
         if( selectedColonies[0] != null )
             $("#source").css("background-image","url(gallery/colony" + selectedColonies[0] + ".png)")
+            breeder.setSource( selectedColonies[0] )
         else
             $("#source").css("background-image","none")
+            breeder.setSource( null )
 
         if( selectedColonies[1] != null )
             $("#dest").css("background-image","url(gallery/colony" + selectedColonies[1] + ".png)")
+            breeder.setDest( selectedColonies[1] )
         else
             $("#dest").css("background-image","none")
+            breeder.setDest( null )
 
     select = ( element ) ->
         if( selectedColonies[0] == null)
@@ -273,7 +362,6 @@ class BreedSelector
             selectedColonies[1] = element.id
         $(element).addClass("selected")
         updateSourceDest()
-
 
     deselect = ( element, index ) ->
         $(element).removeClass("selected")

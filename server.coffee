@@ -5,46 +5,49 @@ server = http.createServer(app)
 io = require('socket.io').listen(server)
 server.listen(8080)
 fs = require('fs')
+shortid = require('shortid')
+
+
+jsonfile = require('jsonfile')
+util = require('util')
+
+colonies = []
+
+dburl = 'db.json'
+
+
 
 app.use(express.static('public'));
 
-colonies = [];
-
-
 
 #----selects 20 bacteria at random from the current collection----#
-getRandomColonies = () ->
-    someColonies = [];
-    if(colonies.length > 0)
-        for i in [0..19] by 1
-            index = Math.floor( Math.random() * colonies.length )
-            someColonies.push(colonies[index])
-    return someColonies;
+getRandomColonies = ( callback ) ->
 
-#–----server side class of bacteria--------#
+    jsonfile.readFile(dburl, (err, obj) ->
+        if( err )
+            throw err
+        colonies = obj
 
-# class Colony
-#     constructor: () ->
-#         @id = 0;
-#         @startingBranches = 10;
-#         @startingSize = 10.0;
-#         @branchFactor = 0.001;
-#         @branchDirectionMod = -Math.PI*0.5;
-#         #---point shape/size-----#
-#         @childPointSizeRandom = 2.0;
-#         @solidness = 0.5;
-#         @fatness = 0.02;
-#         @childPointSize = 0.99;
-#         @red = 40;
-#         @green = 150;
-#         @blue = 255;
-#         @opacity = 0.1;
-#         #----growth pattern-----#
-#         @sineMod = 0.0;
-#         @gapSize = 1.0;
-#         @curveRandom = 0.3;
-#         @curveMod = 0.01;
-#         @deathSize = 0.01;
+
+        someColonies = [];
+
+        coloniesSelected = 0
+        totalColoniesToSelect = 20
+
+        if( colonies.length < totalColoniesToSelect )
+            totalColoniesToSelect = colonies.length
+
+        if(colonies.length > 0)
+            while coloniesSelected < totalColoniesToSelect
+                x = Math.floor( Math.random() * colonies.length )
+                count = 0
+                for colony in colonies
+                    if( x == count )
+                        someColonies.push(colony)
+                        coloniesSelected++
+
+        callback( someColonies )
+    )
 
 #---in and out messages, setup upon connection-----#
 io.sockets.on('connection', (socket) ->
@@ -60,20 +63,30 @@ io.sockets.on('connection', (socket) ->
 
     #----ask for the entire bacteria collection-----#
     socket.on('getColonyCollection', () ->
-        io.sockets.emit('setColonyCollection', getRandomColonies() );
+        getRandomColonies( (col) ->
+            io.sockets.emit('setColonyCollection', col )
+        )
     )
 
     #-----recieve new bacteria from user-------#
     socket.on('addBacteria', ( newColony, img ) ->
-        #-----add bacteria to collection-----#
-        newColony.id = colonies.length;
-        console.log("adding colony. id = ", newColony.id);
-        colonies.push( newColony )
-        #----create a png from the provided image data------#
-        data = img.replace(/^data:image\/\w+;base64,/, "")
-        buf = new Buffer(data, 'base64')
-        fs.writeFile(__dirname + '/public/gallery/colony' + (colonies.length-1) + '.png', buf)
-        #-----broadcast the updated collection-----#
-        io.sockets.emit('setColonyCollection', getRandomColonies() );
+        newColony.id = shortid.generate()
+        console.log("adding colony: ", newColony)
+
+        jsonfile.readFile(dburl, (err, obj) ->
+            obj.push newColony
+            fs.writeFile(dburl, JSON.stringify(obj), (err) ->
+                data = img.replace(/^data:image\/\w+;base64,/, "")
+                buf = new Buffer(data, 'base64')
+                fs.writeFile(__dirname + '/public/gallery/colony' + newColony.id + '.png', buf)
+
+                getRandomColonies( (col) ->
+                    io.sockets.emit('setColonyCollection', col )
+                )
+
+                if (err)
+                    throw err;
+            );
+        )
     )
 )

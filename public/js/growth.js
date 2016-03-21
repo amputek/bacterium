@@ -1,12 +1,6 @@
-var BreedSelector, Canvas, ColonyParameters, breedMode, breedSelector, canvas, colonyParameters, currentColony, drawGrow, drawLoop, emphasis, frameCount, globalOpacityMod, growing, socket, startGrowing, time;
+var BreedSelector, Breeder, Canvas, ColonyParameters, breedColonies, breedSelector, breeder, canvas, colonyParameters, currentColony, draw, drawLoop, emphasis, frameCount, globalOpacityMod, mode, socket, start;
 
 colonyParameters = null;
-
-frameCount = 0;
-
-time = 200;
-
-growing = false;
 
 emphasis = 0.0;
 
@@ -14,7 +8,7 @@ globalOpacityMod = 1.0;
 
 drawLoop = null;
 
-breedMode = false;
+mode = "grow";
 
 currentColony = null;
 
@@ -22,7 +16,13 @@ canvas = null;
 
 socket = null;
 
+breedColonies = {};
+
 breedSelector = null;
+
+breeder = null;
+
+frameCount = 0;
 
 ColonyParameters = (function() {
   function ColonyParameters() {
@@ -85,7 +85,7 @@ ColonyParameters = (function() {
       }
     }
     return $('#color-picker').minicolors('value', {
-      color: 'rgb(' + Math.round(Math.random() * 255) + ',' + Math.round(Math.random() * 255) + ',' + Math.round(Math.random() * 255) + ')'
+      color: 'rgb(' + Math.round(Math.random() * 205) + ',' + Math.round(Math.random() * 205) + ',' + Math.round(Math.random() * 205) + ')'
     });
   };
 
@@ -144,6 +144,9 @@ Canvas = (function() {
 
   Canvas.prototype.drawPoint = function(red, green, blue, opacity, solidness, size, x, y, direction, fatness) {
     var centerop, edgeop;
+    red = Math.round(red);
+    green = Math.round(green);
+    blue = Math.round(blue);
     centerop = opacity * solidness;
     edgeop = opacity * (1.0 - solidness);
     this.ctx.fillStyle = 'rgba(' + red + ', ' + green + ', ' + blue + ', ' + centerop + ')';
@@ -165,21 +168,103 @@ Canvas = (function() {
 
 })();
 
-startGrowing = function() {
-  canvas.clear();
-  colonyParameters.setupColonyFromInputs(currentColony);
-  currentColony.initSeeds($("input:radio[name ='startpos']:checked").attr("id"));
+Breeder = (function() {
+  function Breeder() {
+    this.source = new Colony();
+    this.dest = new Colony();
+    this.emphasis = 0.0;
+    this.globalOpacityMod = 1.0;
+  }
+
+  Breeder.prototype.setSource = function(c) {
+    return this.source = breedColonies[c];
+  };
+
+  Breeder.prototype.setDest = function(c) {
+    return this.dest = breedColonies[c];
+  };
+
+  Breeder.prototype.interpolate = function(source, destination) {
+    var aswitch, rate, result, step, time;
+    time = 150;
+    rate = -this.emphasis;
+    result = source;
+    aswitch = 150 * -this.emphasis;
+    if (this.emphasis >= 0.0) {
+      if (frameCount < aswitch) {
+        result = source;
+      } else {
+        step = (destination - source) / time;
+        result = source + (step * (frameCount - (time * rate)));
+      }
+    } else {
+      rate = 1.0 + rate;
+      if (frameCount < aswitch) {
+        step = (destination - source) / (time * rate);
+        result = source + (step * frameCount);
+      } else {
+        result = destination;
+      }
+    }
+    return result;
+  };
+
+  Breeder.prototype.interpolateSettings = function(colony) {
+    colony.branchFactor = this.interpolate(this.source.branchFactor, this.dest.branchFactor);
+    colony.branchDirectionMod = this.interpolate(this.source.branchDirectionMod, this.dest.branchDirectionMod);
+    colony.solidness = this.interpolate(this.source.solidness, this.dest.solidness);
+    colony.fatness = this.interpolate(this.source.fatness, this.dest.fatness);
+    colony.childPointSize = this.interpolate(this.source.childPointSize, this.dest.childPointSize);
+    colony.childPointSizeRandom = this.interpolate(this.source.childPointSizeRandom, this.dest.childPointSizeRandom);
+    colony.red = this.interpolate(this.source.red, this.dest.red) + random(-10, 10);
+    colony.green = this.interpolate(this.source.green, this.dest.green) + random(-10, 10);
+    colony.blue = this.interpolate(this.source.blue, this.dest.blue) + random(-10, 10);
+    colony.opacity = this.interpolate(this.source.opacity, this.dest.opacity);
+    colony.opacity *= this.globalOpacityMod;
+    colony.gapSize = this.interpolate(this.source.gapSize, this.dest.gapSize);
+    colony.sineMod = this.interpolate(this.source.sineMod, this.dest.sineMod);
+    colony.curveMod = this.interpolate(this.source.curveMod, this.dest.curveMod);
+    colony.curveRandom = this.interpolate(this.source.curveRandom, this.dest.curveRandom);
+    return colony;
+  };
+
+  return Breeder;
+
+})();
+
+start = function() {
   frameCount = 0;
-  growing = true;
   window.clearInterval(drawLoop);
-  return drawLoop = setInterval(drawGrow, 1000 / 60);
+  canvas.clear();
+  if (mode === "breed") {
+    if (!breedSelector.ableToBreed()) {
+      return;
+    }
+    currentColony.deathSize = (breeder.source.deathSize + breeder.dest.deathSize) / 2;
+    currentColony.startingBranches = breeder.source.startingBranches;
+    currentColony.startingSize = breeder.source.startingSize;
+    breeder.globalOpacityMod = document.getElementById('opacity-mod').value * 0.008 + 0.2;
+    breeder.emphasis = document.getElementById('emphasis').value * 0.02 - 1.0;
+    console.log(breeder.emphasis);
+  } else {
+    colonyParameters.setupColonyFromInputs(currentColony);
+  }
+  currentColony.initSeeds($("input:radio[name ='startpos']:checked").attr("id"));
+  return drawLoop = setInterval(draw, 1000 / 60);
 };
 
-drawGrow = function() {
-  if (growing === true && frameCount < 500) {
-    frameCount++;
+draw = function() {
+  if (currentColony.numberOfBranches() > 0 && frameCount <= 200) {
+    if (mode === "breed") {
+      currentColony = breeder.interpolateSettings(currentColony);
+    }
     currentColony.update();
-    return currentColony.draw(canvas);
+    currentColony.draw(canvas);
+    return frameCount++;
+  } else {
+    console.log(frameCount);
+    frameCount = 0;
+    return window.clearInterval(drawLoop);
   }
 };
 
@@ -188,17 +273,11 @@ window.onload = function() {
   colonyParameters = new ColonyParameters();
   canvas = new Canvas();
   breedSelector = new BreedSelector();
-  $('#drawCanvas').click(function() {
-    if (breedMode === false) {
-      startGrowing();
-    }
-    if (breedMode === true) {
-      return startBreeding();
-    }
-  });
+  breeder = new Breeder();
+  $('#drawCanvas').click(start);
   $('#randomButton').click(function() {
     colonyParameters.randomise();
-    return startGrowing();
+    return start();
   });
   $('#upload-colony').click(function() {
     var obj, send, st;
@@ -212,55 +291,77 @@ window.onload = function() {
     $("#controls-wrapper").css("display", "inline-block");
     $("#gallery").css("display", "none");
     $("#breed-tab").removeClass("selected");
-    return $("#grow-tab").addClass("selected");
+    $("#grow-tab").addClass("selected");
+    window.clearInterval(drawLoop);
+    return mode = "grow";
   });
   $('#breed-tab').click(function() {
     $("#controls-wrapper").css("display", "none");
     $("#gallery").css("display", "inline-block");
     $("#breed-tab").addClass("selected");
-    return $("#grow-tab").removeClass("selected");
+    $("#grow-tab").removeClass("selected");
+    window.clearInterval(drawLoop);
+    return mode = "breed";
   });
+  socket = null;
   socket = io.connect('http://192.168.1.198:8080');
   socket.emit('getColonyCollection');
+  socket.on('setColonyCollection', function(colonies) {
+    var col, colony, i, len, n;
+    console.log('colony collection: ', colonies);
+    document.getElementById("grid").innerHTML = "";
+    col = null;
+    for (i = 0, len = colonies.length; i < len; i++) {
+      colony = colonies[i];
+      breedColonies["" + colony.id] = colony;
+      console.log("adding colony", colony.id);
+      n = document.createElement("div");
+      n.addEventListener("click", breedSelector.clickImage, false);
+      n.setAttribute('id', colony.id);
+      n.setAttribute('class', 'gimg');
+      n.style.backgroundImage = "url(gallery/colony" + colony.id + ".png)";
+      document.getElementById("grid").appendChild(n);
+    }
+    return console.log(breedColonies);
+  });
   colonyParameters.randomise();
-  return startGrowing();
+  return start();
 };
-
-socket.on('setColonyCollection', function(colonies) {
-  var col, colony, i, len, n, results;
-  console.log('colony collection: ', colonies);
-  document.getElementById("grid").innerHTML = "";
-  col = null;
-  results = [];
-  for (i = 0, len = colonies.length; i < len; i++) {
-    colony = colonies[i];
-    n = document.createElement("div");
-    n.addEventListener("click", breedSelector.clickImage, false);
-    n.setAttribute('id', colony.id);
-    n.setAttribute('class', 'gimg');
-    n.style.backgroundImage = "url(gallery/colony" + colony.id + ".png)";
-    results.push(document.getElementById("grid").appendChild(n));
-  }
-  return results;
-});
 
 BreedSelector = (function() {
   var deselect, select, selectedColonies, updateSourceDest;
 
-  function BreedSelector() {}
+  function BreedSelector() {
+    $("#swap-source-dest").click(function() {
+      var p0, p1;
+      p1 = selectedColonies[1];
+      p0 = selectedColonies[0];
+      selectedColonies[0] = p1;
+      selectedColonies[1] = p0;
+      return updateSourceDest();
+    });
+  }
 
   selectedColonies = [null, null];
+
+  BreedSelector.prototype.ableToBreed = function() {
+    return selectedColonies[0] !== null && selectedColonies[1] !== null;
+  };
 
   updateSourceDest = function() {
     if (selectedColonies[0] !== null) {
       $("#source").css("background-image", "url(gallery/colony" + selectedColonies[0] + ".png)");
+      breeder.setSource(selectedColonies[0]);
     } else {
       $("#source").css("background-image", "none");
+      breeder.setSource(null);
     }
     if (selectedColonies[1] !== null) {
-      return $("#dest").css("background-image", "url(gallery/colony" + selectedColonies[1] + ".png)");
+      $("#dest").css("background-image", "url(gallery/colony" + selectedColonies[1] + ".png)");
+      return breeder.setDest(selectedColonies[1]);
     } else {
-      return $("#dest").css("background-image", "none");
+      $("#dest").css("background-image", "none");
+      return breeder.setDest(null);
     }
   };
 

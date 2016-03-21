@@ -16,13 +16,13 @@
     <body>
         <div id="wrapper">
 
-            <div id = "bacteriaDiv">
+            <div id = "colony-wrapper">
                 <div id = "title-wrapper">
                     <span id="title">bacterium</span>
                     <span id="author">generative html5-canvas</span>
                 </div>
                 <canvas id="drawCanvas" width="602" height="602"></canvas>
-                <div id="buttonDiv">
+                <div id="grow-controls">
                     <div id = "seed-position">
                         <input id="edge" type="radio" name="startpos" hidden>
                         <label for="edge" class="switch switch--on" onclick="">edge</label>
@@ -32,7 +32,6 @@
                         <label for="line" class="switch switch--on">line</label>
                         <input id="random" type="radio" name="startpos" hidden>
                         <label for="random" class="switch switch--on">random</label>
-                        <!-- <h3>SEED POSITION</h3>                         -->
                     </div>
                 </div>
             </div>
@@ -43,7 +42,7 @@
                     <div class = "tab selected" id = "grow-tab">GROW</div>
                     <div class = "tab" id = "breed-tab">BREED</div>
                 </div>
-                <div id="controls-wrapper">
+                <div class = "control-wrapper" id="controls-wrapper">
                     <h3>COLONY PARAMETERS</h3>
 
                     <div class = "parameter">
@@ -149,14 +148,27 @@
                     </div>
                 </div>
 
-                <div id="gallery">
+                <div class = "control-wrapper" id="gallery">
                     <h3>USER GENERATED COLONIES</h3>
                     <h5>select two to breed</h5>
                     <div id="grid"></div>
                     <div id = "sourcedest">
                         <div id="source" class="sourcedest"></div>
+                        <div id="swap-source-dest"></div>
                         <div id="dest" class="sourcedest"></div>
-                    <div>
+                    </div>
+                    <div class = "parameter">
+                        <div class = "parameter-name">emphasis</div>
+                        <div class = "parameter-min">parent a</div>
+                        <input type="range" id="emphasis" min="0.1" max="100.0">
+                        <div class = "parameter-max">parent b</div>
+                    </div>
+                    <div class = "parameter">
+                        <div class = "parameter-name">opacity mod</div>
+                        <div class = "parameter-min">fainter</div>
+                        <input type="range" id="opacity-mod" min="0.1" max="100.0">
+                        <div class = "parameter-max">bolder</div>
+                    </div>
                 </div>
                         <!-- </div>
                         <div id="source" class="sourcedest"></div>

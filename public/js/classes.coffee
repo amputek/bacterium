@@ -57,6 +57,9 @@ class Colony
             deathSize : @deathSize
         }
 
+    numberOfBranches: () ->
+        return @branches.length
+
     createPoint = ( x, y, angle, size ) ->
         return { x: x, y: y, dir: angle, si: size }
 
@@ -158,8 +161,5 @@ class Colony
 
     draw: ( canvas ) ->
         for branch in @branches
-            red = Math.round(@red)
-            green = Math.round(@green)
-            blue = Math.round(@blue)
             point = getLastPointOfBranch( branch );
-            canvas.drawPoint(red,green,blue,@opacity,@solidness,point.si,point.x,point.y,point.dir,@fatness)
+            canvas.drawPoint(@red,@green,@blue,@opacity,@solidness,point.si,point.x,point.y,point.dir,@fatness)

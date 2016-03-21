@@ -59,6 +59,10 @@ Colony = (function() {
     };
   };
 
+  Colony.prototype.numberOfBranches = function() {
+    return this.branches.length;
+  };
+
   createPoint = function(x, y, angle, size) {
     return {
       x: x,
@@ -156,16 +160,13 @@ Colony = (function() {
   };
 
   Colony.prototype.draw = function(canvas) {
-    var blue, branch, green, j, len, point, red, ref, results;
+    var branch, j, len, point, ref, results;
     ref = this.branches;
     results = [];
     for (j = 0, len = ref.length; j < len; j++) {
       branch = ref[j];
-      red = Math.round(this.red);
-      green = Math.round(this.green);
-      blue = Math.round(this.blue);
       point = getLastPointOfBranch(branch);
-      results.push(canvas.drawPoint(red, green, blue, this.opacity, this.solidness, point.si, point.x, point.y, point.dir, this.fatness));
+      results.push(canvas.drawPoint(this.red, this.green, this.blue, this.opacity, this.solidness, point.si, point.x, point.y, point.dir, this.fatness));
     }
     return results;
   };
