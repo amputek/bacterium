@@ -2,22 +2,21 @@ express = require('express')
 app = express()
 http = require('http')
 server = http.createServer(app)
+
+# TODO: stop using sockets. overkill!
 io = require('socket.io').listen(server)
 server.listen(8080)
 fs = require('fs')
 shortid = require('shortid')
-
-
 jsonfile = require('jsonfile')
 util = require('util')
 
-colonies = []
+app.use(express.static('public'));
 
+colonies = []
 dburl = 'db.json'
 
 
-
-app.use(express.static('public'));
 
 
 #----selects 20 bacteria at random from the current collection----#
@@ -27,7 +26,6 @@ getRandomColonies = ( callback ) ->
         if( err )
             throw err
         colonies = obj
-
 
         someColonies = [];
 
@@ -49,6 +47,35 @@ getRandomColonies = ( callback ) ->
         callback( someColonies )
     )
 
+
+app.get('/' , (req, res)->
+    res.render('index', { message: req.flash('error') });
+)
+
+app.post( '/addBacteria' , (req,res)->
+    newColony.id = shortid.generate()
+    console.log( "adding colony: ", newColony.id )
+    jsonfile.readFile(dburl, (err, obj) ->
+        obj.push newColony
+        fs.writeFile(dburl, JSON.stringify(obj), (err) ->
+            if (err)
+                throw err;
+            data = img.replace(/^data:image\/\w+;base64,/, "")
+            buf = new Buffer(data, 'base64')
+            fs.writeFile(__dirname + '/public/gallery/colony' + newColony.id + '.png', buf)
+            getRandomColonies( (col)->
+                res.send({colonies:col});
+            )
+        )
+    )
+)
+
+app.post( '/getColonyCollection' , (req,res)->
+    # SaveAndExport( req, res );
+
+    res.send({ videos: items });
+);
+
 #---in and out messages, setup upon connection-----#
 io.sockets.on('connection', (socket) ->
     console.log('connection');
@@ -57,36 +84,30 @@ io.sockets.on('connection', (socket) ->
         console.log('disconnecting', socket.index);
     )
 
-    socket.on('getBacteria', (source, dest) ->
-        io.sockets.emit('setBacteria', [ colonies[source], colonies[dest] ])
-    )
-
-    #----ask for the entire bacteria collection-----#
-    socket.on('getColonyCollection', () ->
+    sendColonies = () ->
         getRandomColonies( (col) ->
             io.sockets.emit('setColonyCollection', col )
         )
-    )
+
+    #----ask for the entire bacteria collection-----#
+    socket.on('getColonyCollection', sendColonies )
 
     #-----recieve new bacteria from user-------#
     socket.on('addBacteria', ( newColony, img ) ->
         newColony.id = shortid.generate()
-        console.log("adding colony: ", newColony)
+        console.log( "adding colony: ", newColony.id )
 
         jsonfile.readFile(dburl, (err, obj) ->
             obj.push newColony
             fs.writeFile(dburl, JSON.stringify(obj), (err) ->
+                if (err)
+                    throw err;
                 data = img.replace(/^data:image\/\w+;base64,/, "")
                 buf = new Buffer(data, 'base64')
                 fs.writeFile(__dirname + '/public/gallery/colony' + newColony.id + '.png', buf)
 
-                getRandomColonies( (col) ->
-                    io.sockets.emit('setColonyCollection', col )
-                )
-
-                if (err)
-                    throw err;
-            );
+                sendColonies()
+            )
         )
     )
 )

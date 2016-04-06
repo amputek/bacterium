@@ -20,11 +20,11 @@ jsonfile = require('jsonfile');
 
 util = require('util');
 
+app.use(express["static"]('public'));
+
 colonies = [];
 
 dburl = 'db.json';
-
-app.use(express["static"]('public'));
 
 getRandomColonies = function(callback) {
   return jsonfile.readFile(dburl, function(err, obj) {
@@ -56,35 +56,66 @@ getRandomColonies = function(callback) {
   });
 };
 
+app.get('/', function(req, res) {
+  return res.render('index', {
+    message: req.flash('error')
+  });
+});
+
+app.post('/addBacteria', function(req, res) {
+  newColony.id = shortid.generate();
+  console.log("adding colony: ", newColony.id);
+  return jsonfile.readFile(dburl, function(err, obj) {
+    obj.push(newColony);
+    return fs.writeFile(dburl, JSON.stringify(obj), function(err) {
+      var buf, data;
+      if (err) {
+        throw err;
+      }
+      data = img.replace(/^data:image\/\w+;base64,/, "");
+      buf = new Buffer(data, 'base64');
+      fs.writeFile(__dirname + '/public/gallery/colony' + newColony.id + '.png', buf);
+      return getRandomColonies(function(col) {
+        return res.send({
+          colonies: col
+        });
+      });
+    });
+  });
+});
+
+app.post('/getColonyCollection', function(req, res) {
+  return res.send({
+    videos: items
+  });
+});
+
 io.sockets.on('connection', function(socket) {
+  var sendColonies;
   console.log('connection');
   socket.on('disconnect', function() {
     return console.log('disconnecting', socket.index);
   });
-  socket.on('getBacteria', function(source, dest) {
-    return io.sockets.emit('setBacteria', [colonies[source], colonies[dest]]);
-  });
-  socket.on('getColonyCollection', function() {
+  sendColonies = function() {
     return getRandomColonies(function(col) {
       return io.sockets.emit('setColonyCollection', col);
     });
-  });
+  };
+  socket.on('getColonyCollection', sendColonies);
   return socket.on('addBacteria', function(newColony, img) {
     newColony.id = shortid.generate();
-    console.log("adding colony: ", newColony);
+    console.log("adding colony: ", newColony.id);
     return jsonfile.readFile(dburl, function(err, obj) {
       obj.push(newColony);
       return fs.writeFile(dburl, JSON.stringify(obj), function(err) {
         var buf, data;
-        data = img.replace(/^data:image\/\w+;base64,/, "");
-        buf = new Buffer(data, 'base64');
-        fs.writeFile(__dirname + '/public/gallery/colony' + newColony.id + '.png', buf);
-        getRandomColonies(function(col) {
-          return io.sockets.emit('setColonyCollection', col);
-        });
         if (err) {
           throw err;
         }
+        data = img.replace(/^data:image\/\w+;base64,/, "");
+        buf = new Buffer(data, 'base64');
+        fs.writeFile(__dirname + '/public/gallery/colony' + newColony.id + '.png', buf);
+        return sendColonies();
       });
     });
   });

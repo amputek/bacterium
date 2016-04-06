@@ -1,10 +1,6 @@
-var BreedSelector, Breeder, Canvas, ColonyParameters, breedColonies, breedSelector, breeder, canvas, colonyParameters, currentColony, draw, drawLoop, emphasis, frameCount, globalOpacityMod, mode, socket, start;
+var BreedSelector, Breeder, Canvas, ColonyParameters, breedColonies, breedSelector, breeder, canvas, colonyParameters, currentColony, draw, drawLoop, frameCount, mode, socket, start, switchTab;
 
 colonyParameters = null;
-
-emphasis = 0.0;
-
-globalOpacityMod = 1.0;
 
 drawLoop = null;
 
@@ -176,6 +172,14 @@ Breeder = (function() {
     this.globalOpacityMod = 1.0;
   }
 
+  Breeder.prototype.setup = function(colony, op, emp) {
+    colony.deathSize = (this.source.deathSize + this.dest.deathSize) / 2;
+    colony.startingBranches = this.source.startingBranches;
+    colony.startingSize = this.source.startingSize;
+    this.globalOpacityMod = op * 0.008 + 0.2;
+    return this.emphasis = emp * 0.02 - 1.0;
+  };
+
   Breeder.prototype.setSource = function(c) {
     return this.source = breedColonies[c];
   };
@@ -239,13 +243,9 @@ start = function() {
   if (mode === "breed") {
     if (!breedSelector.ableToBreed()) {
       return;
+    } else {
+      breeder.setup(currentColony, document.getElementById('opacity-mod').value, document.getElementById('emphasis').value);
     }
-    currentColony.deathSize = (breeder.source.deathSize + breeder.dest.deathSize) / 2;
-    currentColony.startingBranches = breeder.source.startingBranches;
-    currentColony.startingSize = breeder.source.startingSize;
-    breeder.globalOpacityMod = document.getElementById('opacity-mod').value * 0.008 + 0.2;
-    breeder.emphasis = document.getElementById('emphasis').value * 0.02 - 1.0;
-    console.log(breeder.emphasis);
   } else {
     colonyParameters.setupColonyFromInputs(currentColony);
   }
@@ -265,6 +265,23 @@ draw = function() {
     console.log(frameCount);
     frameCount = 0;
     return window.clearInterval(drawLoop);
+  }
+};
+
+switchTab = function(m) {
+  var g;
+  if (m !== mode) {
+    g = m === "grow";
+    $("#controls-wrapper").css("display", g === true ? "inline-block" : "none");
+    $("#gallery").css("display", g === true ? "none" : "inline-block");
+    if (g) {
+      $("#grow-tab").removeClass("selected");
+      $("#breed-tab").addClass("selected");
+    } else {
+      $("#grow-tab").addClass("selected");
+      $("#breed-tab").removeClass("selected");
+    }
+    return mode = m;
   }
 };
 
@@ -288,23 +305,13 @@ window.onload = function() {
     return socket.emit('addBacteria', send, st);
   });
   $('#grow-tab').click(function() {
-    $("#controls-wrapper").css("display", "inline-block");
-    $("#gallery").css("display", "none");
-    $("#breed-tab").removeClass("selected");
-    $("#grow-tab").addClass("selected");
-    window.clearInterval(drawLoop);
-    return mode = "grow";
+    return switchTab("grow");
   });
   $('#breed-tab').click(function() {
-    $("#controls-wrapper").css("display", "none");
-    $("#gallery").css("display", "inline-block");
-    $("#breed-tab").addClass("selected");
-    $("#grow-tab").removeClass("selected");
-    window.clearInterval(drawLoop);
-    return mode = "breed";
+    return switchTab("breed");
   });
   socket = null;
-  socket = io.connect('http://192.168.1.198:8080');
+  socket = io.connect('http://localhost:8080');
   socket.emit('getColonyCollection');
   socket.on('setColonyCollection', function(colonies) {
     var col, colony, i, len, n;

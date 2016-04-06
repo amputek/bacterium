@@ -1,6 +1,4 @@
 colonyParameters = null
-emphasis = 0.0;
-globalOpacityMod = 1.0;
 drawLoop = null;
 mode = "grow"
 currentColony = null;
@@ -144,12 +142,20 @@ class Breeder
         @emphasis = 0.0
         @globalOpacityMod = 1.0
 
+    setup: ( colony, op, emp ) ->
+        colony.deathSize = (@source.deathSize + @dest.deathSize) / 2;
+        colony.startingBranches = @source.startingBranches;
+        colony.startingSize = @source.startingSize;
+
+        #-----growth variables------#
+        @globalOpacityMod = op * 0.008 + 0.2
+        @emphasis = emp * 0.02 - 1.0;
+
     setSource: ( c ) ->
         @source = breedColonies[ c ]
 
     setDest: ( c ) ->
         @dest = breedColonies[ c ]
-
 
     #--interpolates between two values (source, destination)--#
     interpolate: (source, destination) ->
@@ -205,14 +211,9 @@ start = () ->
         #----initialise bacteria variables-----#
         if( !breedSelector.ableToBreed() )
             return
-        currentColony.deathSize = (breeder.source.deathSize + breeder.dest.deathSize) / 2;
-        currentColony.startingBranches = breeder.source.startingBranches;
-        currentColony.startingSize = breeder.source.startingSize;
+        else
+            breeder.setup( currentColony, document.getElementById('opacity-mod').value, document.getElementById('emphasis').value )
 
-        #-----growth variables------#
-        breeder.globalOpacityMod = document.getElementById('opacity-mod').value * 0.008 + 0.2
-        breeder.emphasis = document.getElementById('emphasis').value * 0.02 - 1.0;
-        console.log(breeder.emphasis)
     else
         colonyParameters.setupColonyFromInputs( currentColony );
 
@@ -236,6 +237,18 @@ draw = () ->
         frameCount = 0
         window.clearInterval( drawLoop )
 
+switchTab = (m) ->
+    if( m != mode )
+        g = m == "grow"
+        $("#controls-wrapper").css("display", if g is true then "inline-block" else "none")
+        $("#gallery").css("display", if g is true then "none" else "inline-block")
+        if( g )
+            $( "#grow-tab" ).removeClass("selected");
+            $( "#breed-tab" ).addClass("selected");
+        else
+            $( "#grow-tab" ).addClass("selected");
+            $( "#breed-tab" ).removeClass("selected");
+        mode = m
 
 window.onload = ->
 
@@ -263,21 +276,10 @@ window.onload = ->
     )
 
     $('#grow-tab').click( () ->
-        $("#controls-wrapper").css("display","inline-block")
-        $("#gallery").css("display","none")
-        $("#breed-tab").removeClass("selected");
-        $("#grow-tab").addClass("selected");
-        window.clearInterval( drawLoop )
-        mode = "grow"
+        switchTab("grow")
     )
-
     $('#breed-tab').click( () ->
-        $("#controls-wrapper").css("display","none")
-        $("#gallery").css("display","inline-block")
-        $("#breed-tab").addClass("selected");
-        $("#grow-tab").removeClass("selected");
-        window.clearInterval( drawLoop )
-        mode = "breed"
+        switchTab("breed")
     )
 
     #----breed control------#
@@ -286,7 +288,8 @@ window.onload = ->
 
     #----node server stuff------#
     socket = null
-    socket = io.connect('http://192.168.1.198:8080');
+    # socket = io.connect('http://192.168.1.198:8080');
+    socket = io.connect('http://localhost:8080');
     socket.emit('getColonyCollection')
 
 
@@ -310,12 +313,6 @@ window.onload = ->
 
 
 
-
-    #--for breeding, the current bacteria interpolates between source and destination
-    # selectedBacteria = [];
-    # @dest = new Bacteria( ctx )
-    # @source = new Bacteria( ctx )
-
     colonyParameters.randomise();
     start()
 
@@ -335,7 +332,6 @@ class BreedSelector
         )
 
     selectedColonies = [null,null]
-
 
     ableToBreed: () ->
         return selectedColonies[0] != null && selectedColonies[1] != null
